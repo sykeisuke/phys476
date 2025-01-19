@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.utils import shuffle
+import matplotlib.pyplot as plt
 
 class LogisticRegression(object):
     '''
@@ -69,7 +70,7 @@ if __name__ == '__main__':
 
     epochs = 10
     batch_size = 50
-    n_batches = x.shape[0] # batch_size
+    n_batches = x.shape[0] // batch_size
 
     for epoch in range(epochs):
         train_loss = 0.
@@ -96,3 +97,25 @@ if __name__ == '__main__':
     '''
     5. Plotting
     '''
+    def plot_decision_boundary_lines(model, x):
+        x_min, x_max = x[:, 0].min() - 1, x[:, 0].max() + 1
+        x_vals = np.linspace(x_min, x_max, 100)
+
+        for i in range(model.W.shape[1] - 1):
+            w_diff = model.W[:, i] - model.W[:, i + 1]
+            b_diff = model.b[i] - model.b[i + 1]
+            y_vals = -(w_diff[0] * x_vals + b_diff) / w_diff[1]
+            plt.plot(x_vals, y_vals, label=f"Boundary {i+1}-{i+2}")
+
+    plt.figure(figsize=(8, 6))
+    for i, label in enumerate(['Class 1', 'Class 2', 'Class 3']):
+        plt.scatter(x[t[:, i] == 1, 0], x[t[:, i] == 1, 1], label=f'{label}', alpha=0.6, edgecolor='k')
+
+    plot_decision_boundary_lines(model, x)
+
+    plt.title('Data Distribution After Classification with Decision Boundaries')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.legend()
+    plt.show()
+
