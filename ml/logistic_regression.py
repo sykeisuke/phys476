@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 class LogisticRegression(object):
     '''
@@ -53,16 +54,17 @@ if __name__ == '__main__':
         loss = compute_loss(t, model(x)) # model(x) is called via __call__ method
         return loss
 
-epochs = 100
+    epochs = 100
+    loss_history = []
+    output_history = []
 
-for epoch in range(epochs):
-    train_loss = train_step(x,t)
+    for epoch in range(epochs):
+        train_loss = train_step(x,t)
+        loss_history.append(train_loss)
+        output_history.append([model(input) for input in x])
 
-    if epoch % 10 == 0 or epoch == epochs - 1: 
-        print ('epoch: {}, loss: {:.3f}'.format(
-            epoch+1,
-            train_loss # loss value
-        ))
+        if epoch % 10 == 0 or epoch == epochs - 1: 
+            print ('epoch: {}, loss: {:.3f}'.format(epoch+1, train_loss))
 
     '''
     4. Model evaluation
@@ -70,4 +72,29 @@ for epoch in range(epochs):
     for input in x:
         print('{} => {:.3f}'.format(input, model(input))) # model input and output values
 
+    '''
+    5. Plotting
+    '''
+    # Plot loss vs epoch
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(1, epochs + 1), loss_history, label='Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Loss vs Epoch')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+    # Plot model output convergence for [0,0], [0,1], [1,0], [1,1]
+    outputs_per_epoch = np.array(output_history)
+    plt.figure(figsize=(10, 6))
+    for i, point in enumerate(x):
+        plt.plot(range(1, epochs + 1), outputs_per_epoch[:, i], label=f"Input {point}")
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Model Output')
+    plt.title('Model Output Convergence for OR Gate')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
 
