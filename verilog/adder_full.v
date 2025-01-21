@@ -6,11 +6,20 @@ module Full_Adder (
     output CO
 );
 
-    // Sum is A XOR B XOR CI
-    assign S = A ^ B ^ CI;
+    // Internal wires for Half Adder outputs
+    wire S1;
+    wire C1, C2;
 
-    // Carry Out is (A AND B) OR (B AND CI) OR (A AND CI)
-    assign CO = (A & B) | (B & CI) | (A & CI);
+    // First Half Adder: adds A and B
+    assign S1 = A ^ B;
+    assign C1 = A & B;
+
+    // Second Half Adder: adds S1 and CI
+    assign S = S1 ^ CI;
+    assign C2 = S1 & CI;
+
+    // OR gate for Carry Out
+    assign CO = C1 | C2;
 
 endmodule
 
