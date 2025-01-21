@@ -1,9 +1,9 @@
 module Full_Adder (
-    input wire A,
-    input wire B,
-    input wire CI,
-    output wire S,
-    output wire CO
+    input A,
+    input B,
+    input CI,
+    output S,
+    output CO
 );
 
     // Sum is A XOR B XOR CI

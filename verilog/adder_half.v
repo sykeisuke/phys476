@@ -1,8 +1,8 @@
 module Half_Adder (
-    input wire A,
-    input wire B, 
-    output wire S,    
-    output wire COC
+    input A,
+    input B, 
+    output S,    
+    output CO
 );
 
     // Sum is A XOR B
