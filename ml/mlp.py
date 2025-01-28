@@ -17,7 +17,9 @@ class MLP(object):
         self.l2 = Layer(input_dim = hidden_dim,
 			output_dim = output_dim,
 			activation = sigmoid,
-			derivative = dsigmoid) 
+			derivative = dsigmoid)
+
+        self.layers = [self.l1, self.l2]
 
     def __call__(self, x):
       return self.forward(x)
@@ -89,8 +91,8 @@ if __name__ == '__main__':
           delta = layer.backward(delta, W)
 
         dW, db = layer.compute_gradients(delta)
-        layer.W = model.W - 0.1 *dW
-        layer.b = model.b - 0.1 *db
+        layer.W = layer.W - 0.1 *dW
+        layer.b = layer.b - 0.1 *db
 
         W = layer.W
 
