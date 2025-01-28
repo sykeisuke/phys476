@@ -97,15 +97,20 @@ if __name__ == '__main__':
         W = layer.W
 
         loss = compute_loss(t, y) 
+      return loss
 
-        return loss
-
-    epochs = 1000
+    epochs = 3000
+    loss_history = []
+    outputs_history = []
 
     for epoch in range(epochs):
         train_loss  = train_step(x, t)
+        loss_history.append(train_loss)
 
-        if epoch % 100 == 0 or epoch == epochs - 1: 
+        # Store model outputs for convergence plotting
+        outputs_history.append(model(x).flatten())
+
+        if epoch % 300 == 0 or epoch == epochs - 1: 
             print ('epoch: {}, loss: {:.3f}'.format(epoch+1, train_loss))
 
     '''
@@ -117,4 +122,24 @@ if __name__ == '__main__':
     '''
     5. Plotting
     '''
+    # Plot loss vs epoch
+    plt.figure(figsize=(10, 5))
+    plt.plot(loss_history)
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Loss vs Epoch')
+    plt.grid()
+    plt.show()
+
+    # Plot model output convergence
+    outputs_history = np.array(outputs_history)
+    plt.figure(figsize=(10, 5))
+    for i, label in enumerate(['[0,0]', '[0,1]', '[1,0]', '[1,1]']):
+        plt.plot(outputs_history[:, i], label=f'Output for {label}')
+    plt.xlabel('Epoch')
+    plt.ylabel('Model Output')
+    plt.title('Model Output Convergence')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
