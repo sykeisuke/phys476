@@ -48,8 +48,6 @@ if __name__ == '__main__':
     epochs = 100
     batch_size = 30
     n_batches = x_train.shape[0] // batch_size
-    loss_history = []
-    outputs_history = []
 
     for epoch in range(epochs):
         train_loss = 0.
@@ -65,12 +63,35 @@ if __name__ == '__main__':
             print ('epoch: {}, loss: {:.3f}'.format(epoch+1, train_loss))
 
     '''
+    4. Decision boundary plotting
+    '''
+    # Create a grid for decision boundary
+    xx, yy = np.meshgrid(
+        np.linspace(x[:, 0].min() - 1, x[:, 0].max() + 1, 200),
+        np.linspace(x[:, 1].min() - 1, x[:, 1].max() + 1, 200)
+    )
+    grid = np.c_[xx.ravel(), yy.ravel()]
+    preds = model(grid).reshape(xx.shape)
+
+    # Plot the training data points
+    plt.figure(figsize=(8, 6))
+    plt.scatter(
+        x_train[:, 0], x_train[:, 1], c=t_train.ravel(), cmap='viridis', edgecolor='k', label='Train data'
+    )
+    plt.contourf(
+        xx, yy, preds, alpha=0.6, levels=np.linspace(0, 1, 3), cmap='viridis'
+    )
+    plt.colorbar(label='Model output (probability)')
+    plt.title("Decision Boundary with Training Data")
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.legend()
+    plt.show()
+
+    '''
     4. Model evaluation
     '''
     preds = model(x_test) > 0.5
     acc = accuracy_score(t_test, preds)
     print('acc.: {:.3f}'.format(acc))
 
-    '''
-    5. Plotting
-    '''
