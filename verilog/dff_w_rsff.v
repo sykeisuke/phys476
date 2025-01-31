@@ -1,8 +1,8 @@
 module DFF(
   input D,
   input CLK,
-  output reg Q,
-  output reg nQ
+  output Q,
+  output nQ
 );
 
   wire S1, R1, Q1, nQ1;
