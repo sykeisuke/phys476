@@ -1,12 +1,13 @@
 module DFF(
   input D,
   input CLK,
-  output reg Q
+  output reg Q,
+  output reg nQ
 );
 
   wire S1, R1, Q1, nQ1;
   wire S2, R2, Q2, nQ2;
-  wire S3, R3, Q, nQ;
+  wire S3, R3;
 
   assign R1 = ~CLK;
   assign S1 = nQ2;
