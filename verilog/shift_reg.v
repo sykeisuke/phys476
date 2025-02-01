@@ -8,7 +8,7 @@ module SR4RE (
 
   always @(posedge CLK) begin
     if (R) begin
-      Q <= 4'b0000
+      Q <= 4'b0000;
     end
     else if (CE) begin
       Q[0] <= SLI;
