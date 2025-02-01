@@ -8,7 +8,7 @@ module counter_tb;
   wire [31:0] Q;
   wire LED0, LED1, LED2;
 
-  // 100MHz CLK Generation
+  // 5MHz CLK Generation
   initial begin
     CLK = 1'b0;
   end
