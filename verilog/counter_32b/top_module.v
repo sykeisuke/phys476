@@ -17,7 +17,7 @@ clk_wiz_0 clk_wiz_inst (
   .clk_out1(clk_div),
   .reset(reset),
   .locked(locked),
-  .clk_in1(CLK) // 修正
+  .clk_in1(CLK) 
 );
 
 // Counter instance 
