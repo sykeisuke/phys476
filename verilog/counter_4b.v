@@ -1,4 +1,4 @@
-module COUNTER(
+module counter_4b(
   input CLK,
   input R,
   input CE,
