@@ -31,11 +31,7 @@ module fifo_sync (
             end
         end else if (wr_en && !full) begin
             fifo_mem[wr_ptr] <= data_in;
-            if (wr_ptr == FIFO_DEPTH-1) begin
-              wr_ptr <= 0;
-            end else begin
-              wr_ptr <= wr_ptr + 1;
-            end
+            wr_ptr <= (wr_ptr +1) % FIFO_DEPTH;
         end
     end
 
@@ -45,11 +41,7 @@ module fifo_sync (
             rd_ptr <= 0;
         end else if (rd_en && !empty) begin
             data_out <= fifo_mem[rd_ptr]; 
-            if (rd_ptr == FIFO_DEPTH-1) begin
-              rd_ptr <= 0;
-            end else begin
-              rd_ptr <= rd_ptr + 1;
-            end
+            rd_ptr <= (rd_ptr +1) % FIFO_DEPTH;
         end
     end
 
