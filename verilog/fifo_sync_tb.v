@@ -1,4 +1,3 @@
-
 'timescale 1ns / 1ps
 
 'define clk_period 10
@@ -16,7 +15,7 @@ module sync_fifo_tb();
     wire [7:0] data_out;
     wire empty;
 
-  fifo_sync SYNC_FIFO(
+  fifo_sync uut(
     .clk(clk),
     .reset(reset),
 
@@ -84,5 +83,5 @@ module sync_fifo_tb();
 	$stop;
   end
 
-endmodule;
+endmodule
 

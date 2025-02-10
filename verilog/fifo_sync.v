@@ -1,4 +1,3 @@
-
 module fifo_sync (
     input clk,
     input reset,
@@ -32,7 +31,11 @@ module fifo_sync (
             end
         end else if (wr_en && !full) begin
             fifo_mem[wr_ptr] <= data_in;
-            wr_ptr <= (wr_ptr + 1) % FIFO_DEPTH;
+            if (wr_ptr == FIFO_DEPTH-1) begin
+              wr_ptr <= 0;
+            end else
+              wr_ptr <= wr_ptr + 1;
+            end
         end
     end
 
@@ -42,7 +45,11 @@ module fifo_sync (
             rd_ptr <= 0;
         end else if (rd_en && !empty) begin
             data_out <= fifo_mem[rd_ptr]; 
-	    rd_ptr <= (rd_ptr + 1) % FIFO_DEPTH;
+            if (rd_ptr == FIFO_DEPTH-1) begin
+              rd_ptr <= 0;
+            end else
+              rd_ptr <= rd_ptr + 1;
+            end
         end
     end
 
