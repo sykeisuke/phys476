@@ -1,6 +1,6 @@
-'timescale 1ns / 1ps
+`timescale 1ns / 1ps
 
-'define clk_period 10
+`define clk_period 10
 
 module sync_fifo_tb();
 
@@ -28,9 +28,9 @@ module sync_fifo_tb();
     .empty(empty)                
 );
 
-  integer i;t
+  integer i;
   initial clk = 1'b1;
-  always #('clk_period/2) clk = ~clk;
+  always #(`clk_period/2) clk = ~clk;
 
   initial begin
   	reset = 1'b1;
@@ -38,7 +38,7 @@ module sync_fifo_tb();
     	rd_en = 1'b0;
 	data_in = 8'b0;
 
-	#('clk_period);
+	#(`clk_period);
 	reset = 1'b0;
 
         // write data
@@ -47,7 +47,7 @@ module sync_fifo_tb();
 
 	for (i = 0; i<8; i= i+1) begin
 		data_in = i;
-		#('clk_period);
+		#(`clk_period);
 	end
 
         // read data
@@ -55,11 +55,11 @@ module sync_fifo_tb();
 	rd_en = 1'b1;
 
 	for (i = 0; i<8; i= i+1) begin
-		#('clk_period);
+		#(`clk_period);
 	end
 
-	#('clk_period);
-	#('clk_period);
+	#(`clk_period);
+	#(`clk_period);
 
         // random access
 	for (i = 0; i<50; i= i+1) begin
@@ -72,13 +72,13 @@ module sync_fifo_tb();
 		if (rd_en && !empty) begin
 		end
 
-		#('clk_period);
+		#(`clk_period);
 	end
 
 
-	#('clk_period);
-	#('clk_period);
-	#('clk_period);
+	#(`clk_period);
+	#(`clk_period);
+	#(`clk_period);
 
 	$stop;
   end
