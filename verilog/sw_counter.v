@@ -48,3 +48,15 @@ module switch_counter(
           (counter == 4'd9) ? 7'b0010000 : // "9"
           7'b1111111; // Default (all segments off)
 
+    // activate only AN[0]
+    assign AN0 = 0; // lower active
+    assign AN1 = 1;
+    assign AN2 = 1;
+    assign AN3 = 1;
+    assign AN4 = 1;
+    assign AN5 = 1;
+    assign AN6 = 1;
+    assign AN7 = 1;
+
+endmodule
+
