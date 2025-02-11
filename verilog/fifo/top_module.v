@@ -19,14 +19,14 @@ module top_module (
     wire clk_div;
     
     // Clocking Wizard Instance
-    fifo_design_clk_wiz_0_1 clk_wiz_0 (
+    fifo_design_clk_wiz_0_1 clk_wiz_0_inst (
         .clk_in1(clk_100MHz),
         .clk_out1(clk_div),
         .reset(reset_rtl_0)
     );
 
     // FIFO Generator Instance
-    fifo_design_fifo_generator_0_0 fifo_generator_0 (
+    fifo_design_fifo_generator_0_0 fifo_generator_0_inst (
         .clk(clk_div),
         .din(din_0),
         .wr_en(wr_en_0),
