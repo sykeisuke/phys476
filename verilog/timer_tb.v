@@ -33,7 +33,7 @@ module TIMER_TB;
     #10 TRG_ONE = 0;  // Set OUT = 1, counter starts
 
     // Let the counter run until it reaches N
-    #500;
+    #3000;
 
     // Apply MODE
     #10 MODE = 1;
@@ -41,7 +41,7 @@ module TIMER_TB;
     #10 TRG_ONE = 0;  // Reset counter when TRG_ONE is received in MODE=1
 
     // Let it count again
-    #500;
+    #3000;
 
     // End simulation
     #100 $finish;
