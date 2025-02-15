@@ -1,14 +1,14 @@
 module fsm_counter_mealy (
-    input wire clk,        // Clock signal
-    input wire rst,        // Reset signal
-    input wire go,         // Start signal
-    output reg done        // Done flag (depends on state + count)
+    input wire clk,        
+    input wire rst,        
+    input wire go,         
+    output reg done        
 );
     
     // State encoding
     typedef enum logic [1:0] {
-        IDLE     = 2'b00,  // Waiting state
-        COUNTING = 2'b01   // Counting state (No DONE state in Mealy)
+        IDLE     = 2'b00,  
+        COUNTING = 2'b01   
     } state_t;
     
     state_t state, next_state;
