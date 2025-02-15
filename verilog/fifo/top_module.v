@@ -5,12 +5,12 @@ module top_module (
     input reset_rtl_0,
     
     // FIFO write interface
-    input [17:0] din_0,
+    input [7:0] din_0,
     input wr_en_0,
     output full_0,
     
     // FIFO read interface
-    output [17:0] dout_0,
+    output [7:0] dout_0,
     input rd_en_0,
     output empty_0
 );

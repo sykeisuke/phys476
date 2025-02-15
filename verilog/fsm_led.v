@@ -1,0 +1,46 @@
+module led_fsm (
+    input wire clk,
+    input wire rst,
+    output reg LED0,
+    output reg LED1,
+    output reg LED2
+);
+
+  reg [31:0] clk_div_counter =0;
+  reg slow_clk = 0;
+
+  always @(posedge clk or posedge rst) begin
+    if (rst) begin
+      clk_div_counter <= 0;
+      slow_clk <= 0;
+    end else begin
+      clk_div_counter <= clk_div_counter + 1;
+      if (clk_div_counter == 27'd50_000_000) begin
+        slow_clk <= ~slow_clk;
+        clk_div_counter <= 0;
+      end
+    end
+  end
+
+  typedef enum reg [1:0] {S0, S1, S2, S3} state_t;
+  state_t state, next_state;
+
+  always @(posedge clk or posedge rst) begin
+      if (rst)
+        state <= S0;
+      else
+        state <= next_state;
+  end
+
+  always @(*) begin
+    case (state)
+      S0: begin {LED2, LED1, LED0} = 3'b001; next_state = S1; end
+      S1: begin {LED2, LED1, LED0} = 3'b010; next_state = S2; end
+      S2: begin {LED2, LED1, LED0} = 3'b100; next_state = S3; end
+      S3: begin {LED2, LED1, LED0} = 3'b000; next_state = S0; end
+      default: begin {LED2, LED1, LED0} = 3'b000; next_state = S0; end
+    endcase
+  end
+
+endmodule
+
