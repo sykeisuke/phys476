@@ -16,47 +16,55 @@ module fsm_counter_mealy (
 
     // State register (sequential logic)
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             state <= IDLE; // Reset to IDLE
-        else
+        end else begin
             state <= next_state;
+        end
     end
 
     // Next state logic (combinational logic)
     always @(*) begin
         case (state)
             IDLE: begin
-                if (go)
+                if (go) begin
                     next_state = COUNTING; // Start counting
-                else
+                end else begin
                     next_state = IDLE;
+                end
             end
             
             COUNTING: begin
-                if (count == 4'hF)
+                if (count == 4'hF) begin
                     next_state = IDLE; // Reset after completion
-                else
+                end else begin
                     next_state = COUNTING;
+                end
             end
             
-            default: next_state = IDLE;
+            default: begin
+                next_state = IDLE;
+            end
         endcase
     end
 
     // Counter logic
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             count <= 4'b0000;
-        else if (state == COUNTING)
+        end else if (state == COUNTING) begin
             count <= count + 1'b1;
+        end
     end
 
     // Mealy Output Logic (depends on state and input)
     always @(*) begin
-        if (state == COUNTING && count == 4'hF)
+        if (state == COUNTING && count == 4'hF) begin
             done = 1'b1; // Immediate output change when count reaches 15
-        else
+        end else begin
             done = 1'b0;
+        end
     end
 
 endmodule
+

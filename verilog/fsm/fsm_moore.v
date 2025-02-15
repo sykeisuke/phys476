@@ -13,57 +13,65 @@ module fsm_counter (
     } state_t;
     
     state_t state, next_state;
+
     reg [3:0] count; // 4-bit counter (0 to 15)
 
     // State register (sequential logic)
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             state <= IDLE; // Reset to IDLE
-        else
+        end else begin
             state <= next_state;
+        end
     end
 
     // Next state logic (combinational logic)
     always @(*) begin
         case (state)
             IDLE: begin
-                if (go)
+                if (go) begin
                     next_state = COUNTING; // Start counting
-                else
+                end else begin
                     next_state = IDLE;
+                end
             end
             
             COUNTING: begin
-                if (count == 4'hF)
+                if (count == 4'hF) begin
                     next_state = DONE; // Transition to DONE when count reaches 15
-                else
+                end else begin
                     next_state = COUNTING;
+                end
             end
             
             DONE: begin
                 next_state = DONE; // Stay in DONE state
             end
             
-            default: next_state = IDLE;
+            default: begin
+                next_state = IDLE;
+            end
         endcase
     end
 
     // Counter logic
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             count <= 4'b0000;
-        else if (state == COUNTING)
+        end else if (state == COUNTING) begin
             count <= count + 1'b1;
+        end
     end
 
     // Output logic (done signal)
     always @(posedge clk) begin
-        if (rst)
+        if (rst) begin
             done <= 1'b0;
-        else if (state == DONE)
+        end else if (state == DONE) begin
             done <= 1'b1;
-        else
+        end else begin
             done <= 1'b0;
+        end
     end
 
 endmodule
