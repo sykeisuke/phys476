@@ -6,13 +6,8 @@ module fsm_counter (
 );
     
     // State encoding
-    typedef enum logic [1:0] {
-        IDLE     = 2'b00, 
-        COUNTING = 2'b01, 
-        DONE     = 2'b10  
-    } state_t;
-    
-    state_t state, next_state;
+    parameter [1:0] IDLE = 2'b00, COUNTING = 2'b01, DONE = 2'b10;
+    reg [1:0] state, next_state;
 
     reg [3:0] count; // 4-bit counter (0 to 15)
 

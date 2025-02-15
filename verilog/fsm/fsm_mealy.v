@@ -6,12 +6,9 @@ module fsm_counter_mealy (
 );
     
     // State encoding
-    typedef enum logic [1:0] {
-        IDLE     = 2'b00,  
-        COUNTING = 2'b01   
-    } state_t;
-    
-    state_t state, next_state;
+    parameter [1:0] IDLE = 2'b00, COUNTING = 2'b01;
+    reg [1:0] state, next_state;
+
     reg [3:0] count; // 4-bit counter (0 to 15)
 
     // State register (sequential logic)

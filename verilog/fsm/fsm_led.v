@@ -1,4 +1,4 @@
-module led_fsm (
+module fsm_led (
     input wire clk,
     input wire rst,
     output reg LED0,
@@ -23,9 +23,9 @@ module led_fsm (
     end
   end
 
-  // State encoding
-  typedef enum reg [1:0] {S0, S1, S2, S3} state_t;
-  state_t state, next_state;
+  // State encoding using parameter
+  parameter S0 = 2'b00, S1 = 2'b01, S2 = 2'b10, S3 = 2'b11;
+  reg [1:0] state, next_state;
 
   // State register (sequential logic)
   always @(posedge slow_clk or posedge rst) begin
