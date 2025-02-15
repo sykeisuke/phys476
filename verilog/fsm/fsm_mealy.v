@@ -15,7 +15,7 @@ module fsm_counter_mealy (
     reg [3:0] count; // 4-bit counter (0 to 15)
 
     // State register (sequential logic)
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst)
             state <= IDLE; // Reset to IDLE
         else
@@ -44,7 +44,7 @@ module fsm_counter_mealy (
     end
 
     // Counter logic
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst)
             count <= 4'b0000;
         else if (state == COUNTING)

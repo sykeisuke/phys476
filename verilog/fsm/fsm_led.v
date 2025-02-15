@@ -9,7 +9,7 @@ module led_fsm (
   reg [31:0] clk_div_counter =0;
   reg slow_clk = 0;
 
-  always @(posedge clk or posedge rst) begin
+  always @(posedge clk) begin
     if (rst) begin
       clk_div_counter <= 0;
       slow_clk <= 0;
@@ -25,7 +25,7 @@ module led_fsm (
   typedef enum reg [1:0] {S0, S1, S2, S3} state_t;
   state_t state, next_state;
 
-  always @(posedge clk or posedge rst) begin
+  always @(posedge clk) begin
       if (rst)
         state <= S0;
       else
