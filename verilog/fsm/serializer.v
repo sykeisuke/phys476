@@ -10,6 +10,7 @@ module serializer (
     // Define HEADER and FOOTER as parameters
     parameter [7:0] HEADER = 8'hAA;
     parameter [7:0] FOOTER = 8'hFF;
+    parameter integer NUM_CHANNELS = 16;
 
     // State encoding using parameter
     parameter [1:0] IDLE = 2'b00, 
@@ -18,7 +19,7 @@ module serializer (
                     SEND_FOOTER = 2'b11;
 
     reg [1:0] state, next_state;
-    reg [3:0] channel_counter;
+    reg [5:0] channel_counter;
     reg [7:0] current_data;
     reg data_ready;
 
@@ -43,7 +44,7 @@ module serializer (
             SEND_HEADER: 
                 next_state = SEND_DATA;
             SEND_DATA: 
-                if (channel_counter == 4'd3) begin // NUM_CHANNELS - 1
+                if (channel_counter == (NUM_CHANNELS-1)) begin // NUM_CHANNELS - 1
                     next_state = SEND_FOOTER;
                 end
             SEND_FOOTER: 
