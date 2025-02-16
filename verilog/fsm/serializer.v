@@ -2,15 +2,14 @@ module serializer (
     input wire clk,
     input wire rst,
     input wire [7:0] din,
-    input wire din_valid,
-    output reg [7:0] dout,
-    output reg dout_valid
+    output reg [7:0] dout
 );
 
     // Define HEADER and FOOTER as parameters
     parameter [7:0] HEADER = 8'hAA;
     parameter [7:0] FOOTER = 8'hFF;
     parameter integer NUM_CHANNELS = 16;
+    parameter integer TIMEOUT = 20; // wait for 20 clk cycles before sending footer
 
     // State encoding using parameter
     parameter [1:0] IDLE = 2'b00, 
@@ -20,8 +19,7 @@ module serializer (
 
     reg [1:0] state, next_state;
     reg [3:0] channel_counter;
-    reg [7:0] current_data;
-    reg data_ready;
+    reg [4:0] timeout_counter; // timer for footer sendout
 
     // State register (synchronous reset)
     always @(posedge clk) begin
@@ -35,16 +33,13 @@ module serializer (
     // Next state logic
     always @(*) begin
         next_state = state;
-        data_ready = 1'b0;
         case (state)
             IDLE: 
-                if (din_valid) begin
-                    next_state = SEND_HEADER;
-                end
+                next_state = SEND_HEADER;
             SEND_HEADER: 
                 next_state = SEND_DATA;
             SEND_DATA: 
-                if (channel_counter == (NUM_CHANNELS-1)) begin
+                if (channel_counter == (NUM_CHANNELS - 1) || timeout_counter == TIMEOUT) begin
                     next_state = SEND_FOOTER;
                 end
             SEND_FOOTER: 
@@ -58,10 +53,15 @@ module serializer (
     always @(posedge clk) begin
         if (rst) begin
             channel_counter <= 0;
-        end else if (state == SEND_DATA && din_valid) begin
+            timeout_counter <= 0;
+        end else if (state == SEND_DATA) begin
             channel_counter <= channel_counter + 1;
+            timeout_counter <= 0; 
         end else if (state == SEND_FOOTER) begin
             channel_counter <= 0;
+            timeout_counter <= 0;
+        end else begin
+            timeout_counter <= timeout_counter + 1;
         end
     end
 
@@ -69,25 +69,12 @@ module serializer (
     always @(posedge clk) begin
         if (rst) begin
             dout <= 8'b0;
-            dout_valid <= 1'b0;
         end else begin
             case (state)
-                SEND_HEADER: begin
-                    dout <= HEADER;
-                    dout_valid <= 1'b1;
-                end
-                SEND_DATA: begin
-                    dout <= din;
-                    dout_valid <= 1'b1;
-                end
-                SEND_FOOTER: begin
-                    dout <= FOOTER;
-                    dout_valid <= 1'b1;
-                end
-                default: begin
-                    dout <= 8'b0;
-                    dout_valid <= 1'b0;
-                end
+                SEND_HEADER: dout <= HEADER;
+                SEND_DATA: dout <= din;
+                SEND_FOOTER: dout <= FOOTER;
+                default: dout <= 8'b0;
             endcase
         end
     end
