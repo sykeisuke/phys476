@@ -3,15 +3,16 @@ module serializer (
     input wire rst,
     input wire [7:0] din,
     input wire din_valid,
-    output reg [7:0] dout
+    output reg [7:0] dout,
+    output reg dout_valid
 );
 
-    // Define HEADER and FOOTER as parameters
+    // Define HEADER and FOOTER
     parameter [7:0] HEADER = 8'hAA;
     parameter [7:0] FOOTER = 8'hFF;
     parameter integer NUM_CHANNELS = 16;
 
-    // State encoding using parameter
+    // FSM State Definitions
     parameter [1:0] IDLE = 2'b00, 
                     SEND_HEADER = 2'b01, 
                     SEND_DATA = 2'b10, 
@@ -19,9 +20,11 @@ module serializer (
 
     reg [1:0] state, next_state;
     reg [3:0] channel_counter; 
+    reg [7:0] buffer;  // Buffer for data latching
+    reg data_ready;     // Internal flag to track data availability
 
     // State register (synchronous reset)
-    always @(posedge clk) begin
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             state <= IDLE;
         end else begin
@@ -39,7 +42,7 @@ module serializer (
             SEND_HEADER: 
                 next_state = SEND_DATA;
             SEND_DATA: 
-                if (channel_counter == (NUM_CHANNELS - 1)) 
+                if (channel_counter == (NUM_CHANNELS - 1))
                     next_state = SEND_FOOTER;
             SEND_FOOTER: 
                 next_state = IDLE;
@@ -49,26 +52,53 @@ module serializer (
     end
 
     // Channel counter logic
-    always @(posedge clk) begin
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             channel_counter <= 0;
-        end else if (state == SEND_DATA) begin
+        end else if (state == SEND_DATA && din_valid) begin
             channel_counter <= channel_counter + 1;
         end else if (state == SEND_FOOTER) begin
             channel_counter <= 0;
         end
     end
 
-    // Output logic (synchronous reset)
+    // Data buffering (prevent missing first data)
     always @(posedge clk) begin
+        if (din_valid) begin
+            buffer <= din;
+            data_ready <= 1;
+        end else begin
+            data_ready <= 0;
+        end
+    end
+
+    // Output logic
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             dout <= 8'b0;
+            dout_valid <= 0;
         end else begin
             case (state)
-                SEND_HEADER: dout <= HEADER;
-                SEND_DATA: dout <= din;
-                SEND_FOOTER: dout <= FOOTER;
-                default: dout <= 8'b0;
+                SEND_HEADER: begin
+                    dout <= HEADER;
+                    dout_valid <= 1;
+                end
+                SEND_DATA: begin
+                    if (data_ready) begin
+                        dout <= buffer;
+                        dout_valid <= 1;
+                    end else begin
+                        dout_valid <= 0;
+                    end
+                end
+                SEND_FOOTER: begin
+                    dout <= FOOTER;
+                    dout_valid <= 1;
+                end
+                default: begin
+                    dout <= 8'b0;
+                    dout_valid <= 0;
+                end
             endcase
         end
     end

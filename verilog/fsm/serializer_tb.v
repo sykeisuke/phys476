@@ -5,8 +5,9 @@ module serializer_tb;
     reg clk;
     reg rst;
     reg [7:0] din;
-    reg din_valid; // 🔥 データ開始を明示
+    reg din_valid;
     wire [7:0] dout;
+    wire dout_valid;
 
     // Instantiate the serializer module
     serializer uut (
@@ -14,7 +15,8 @@ module serializer_tb;
         .rst(rst),
         .din(din),
         .din_valid(din_valid),
-        .dout(dout)
+        .dout(dout),
+        .dout_valid(dout_valid)
     );
 
     // Clock generation (100 MHz = 10 ns period)
@@ -31,7 +33,7 @@ module serializer_tb;
         #20;
         rst = 0;
 
-        // Test 1: Send 4 data samples, then stop (less than NUM_CHANNELS)
+        // Test 1: Send 4 data samples
         #20 din = 8'hA1; din_valid = 1;  
         #10 din = 8'hB2;  
         #10 din = 8'hC3;  
@@ -40,7 +42,7 @@ module serializer_tb;
 
         #160; 
 
-        // Test 2: new data
+        // Test 2: New event
         #50 din = 8'hE5; din_valid = 1;
         #10 din = 8'hF6;
         #10 din_valid = 0;  
@@ -53,3 +55,4 @@ module serializer_tb;
     end
 
 endmodule
+
