@@ -2,6 +2,7 @@ module serializer (
     input wire clk,
     input wire rst,
     input wire [7:0] din,
+    input wire din_valid,
     output reg [7:0] dout
 );
 
@@ -9,7 +10,6 @@ module serializer (
     parameter [7:0] HEADER = 8'hAA;
     parameter [7:0] FOOTER = 8'hFF;
     parameter integer NUM_CHANNELS = 16;
-    parameter integer TIMEOUT = 20; // wait for 20 clk cycles before sending footer
 
     // State encoding using parameter
     parameter [1:0] IDLE = 2'b00, 
@@ -18,8 +18,7 @@ module serializer (
                     SEND_FOOTER = 2'b11;
 
     reg [1:0] state, next_state;
-    reg [3:0] channel_counter;
-    reg [4:0] timeout_counter; // timer for footer sendout
+    reg [3:0] channel_counter; 
 
     // State register (synchronous reset)
     always @(posedge clk) begin
@@ -35,13 +34,13 @@ module serializer (
         next_state = state;
         case (state)
             IDLE: 
-                next_state = SEND_HEADER;
+                if (din_valid)
+                    next_state = SEND_HEADER;
             SEND_HEADER: 
                 next_state = SEND_DATA;
             SEND_DATA: 
-                if (channel_counter == (NUM_CHANNELS - 1) || timeout_counter == TIMEOUT) begin
+                if (channel_counter == (NUM_CHANNELS - 1)) 
                     next_state = SEND_FOOTER;
-                end
             SEND_FOOTER: 
                 next_state = IDLE;
             default: 
@@ -49,19 +48,14 @@ module serializer (
         endcase
     end
 
-    // Channel counter logic (synchronous reset)
+    // Channel counter logic
     always @(posedge clk) begin
         if (rst) begin
             channel_counter <= 0;
-            timeout_counter <= 0;
         end else if (state == SEND_DATA) begin
             channel_counter <= channel_counter + 1;
-            timeout_counter <= 0; 
         end else if (state == SEND_FOOTER) begin
             channel_counter <= 0;
-            timeout_counter <= 0;
-        end else begin
-            timeout_counter <= timeout_counter + 1;
         end
     end
 
