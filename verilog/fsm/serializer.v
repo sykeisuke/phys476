@@ -20,8 +20,6 @@ module serializer (
 
     reg [1:0] state, next_state;
     reg [3:0] channel_counter; 
-    reg [7:0] buffer;  // Buffer for data latching
-    reg data_ready;     // Internal flag to track data availability
 
     // State register (synchronous reset)
     always @(posedge clk or posedge rst) begin
@@ -62,16 +60,6 @@ module serializer (
         end
     end
 
-    // Data buffering (prevent missing first data)
-    always @(posedge clk) begin
-        if (din_valid) begin
-            buffer <= din;
-            data_ready <= 1;
-        end else begin
-            data_ready <= 0;
-        end
-    end
-
     // Output logic
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -84,12 +72,8 @@ module serializer (
                     dout_valid <= 1;
                 end
                 SEND_DATA: begin
-                    if (data_ready) begin
-                        dout <= buffer;
-                        dout_valid <= 1;
-                    end else begin
-                        dout_valid <= 0;
-                    end
+                    dout <= din;
+                    dout_valid <= 1;
                 end
                 SEND_FOOTER: begin
                     dout <= FOOTER;

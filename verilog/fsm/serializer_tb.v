@@ -36,20 +36,22 @@ module serializer_tb;
 
         // Test 1: Send 16 data samples
         #10 din_valid = 1;
+        #10;
         for (i = 0; i < 16; i = i + 1) begin
             #10 din = $random; 
         end
-        #10 din_valid = 0; 
         #10 din = 8'h00;
+        #10 din_valid = 0; 
         #200; // Wait for full packet transmission
 
         // Test 2: Another 16 random data samples
         #50 din_valid = 1;
+        #10;
         for (i = 0; i < 16; i = i + 1) begin
             #10 din = $random;
         end
-        #10 din_valid = 0;  
         #10 din = 8'h00;
+        #10 din_valid = 0;  
         #200;
 
         // End simulation
