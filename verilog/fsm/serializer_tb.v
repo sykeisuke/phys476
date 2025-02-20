@@ -22,6 +22,8 @@ module serializer_tb;
     // Clock generation (100 MHz = 10 ns period)
     always #5 clk = ~clk;
 
+    integer i;
+
     initial begin
         // Initialize signals
         clk = 0;
