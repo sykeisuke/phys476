@@ -29,27 +29,27 @@ module serializer_tb;
         din = 8'h00;
         din_valid = 0;
 
-        // Reset phase
         #20;
         rst = 0;
 
-        // Test 1: Send 4 data samples
-        #20 din = 8'hA1; din_valid = 1;  
-        #10 din = 8'hB2;  
-        #10 din = 8'hC3;  
-        #10 din = 8'hD4;  
+        // Test 1: Send 16 data samples
+        #10 din_valid = 1;
+        for (i = 0; i < 16; i = i + 1) begin
+            #10 din = $random; 
+        end
         #10 din_valid = 0; 
+        #10 din = 8'h00;
+        #200; // Wait for full packet transmission
 
-        #160; 
-
-        // Test 2: New event
-        #50 din = 8'hE5; din_valid = 1;
-        #10 din = 8'hF6;
+        // Test 2: Another 16 random data samples
+        #50 din_valid = 1;
+        for (i = 0; i < 16; i = i + 1) begin
+            #10 din = $random;
+        end
         #10 din_valid = 0;  
-
-        // Wait for full sequence to complete
+        #10 din = 8'h00;
         #200;
-        
+
         // End simulation
         $stop;
     end
