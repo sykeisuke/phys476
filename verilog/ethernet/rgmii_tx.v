@@ -1,5 +1,4 @@
 module rgmii_tx (
-    input wire clk,
     input wire tx_clk,
     input wire [7:0] tx_data,
     input wire tx_valid,
