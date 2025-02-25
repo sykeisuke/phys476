@@ -96,8 +96,8 @@ module top (
         .tx_clk(tx_clk),  // RGMII 送信クロック
         .tx_data(rgmii_tx_data),
         .tx_valid(rgmii_tx_valid),
-        .txd(rgmii_txd),
-        .tx_ctl(rgmii_tx_ctl)
+        .tx_ctl(rgmii_tx_ctl),
+        .txd(rgmii_txd)
     );
 
     // RGMII 送信クロック生成
