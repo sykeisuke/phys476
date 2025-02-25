@@ -19,7 +19,7 @@ module top (
     wire tx_clk;
     wire locked;
 
-    // Clocking Wizard のインスタンスを追加
+    // Clocking Wizard のインスタンス
     clk_wiz_0 clk_gen (
         .clk_out1(tx_clk),  // 生成される 125MHz クロック
         .reset(rst),
@@ -43,7 +43,7 @@ module top (
         .ip_valid(ip_valid)
     );
 
-  // Ethernet フレーム生成 (MAC + EtherType)
+    // Ethernet フレーム生成 (MAC + EtherType)
     ethernet_frame eth_inst (
         .clk(clk),
         .start(mdio_ready),  // PHY 初期化完了後に送信開始
@@ -60,22 +60,42 @@ module top (
         .ready(mdio_ready)
     );
 
-    // 送信データの管理
-    reg [7:0] tx_data_reg;
-    always @(posedge clk) begin
-        if (udp_valid)
-            tx_data_reg <= udp_data;
-        else if (ip_valid)
-            tx_data_reg <= ip_data;
-        else if (eth_valid)
-            tx_data_reg <= eth_data;
+    // 送信データの管理（RGMIIクロックに同期）
+    reg [7:0] rgmii_tx_data;
+    reg rgmii_tx_valid;
+    reg [1:0] tx_state;
+
+    always @(posedge tx_clk) begin
+        case (tx_state)
+            2'b00: begin
+                if (udp_valid) begin
+                    rgmii_tx_data  <= udp_data;
+                    rgmii_tx_valid <= 1;
+                    tx_state <= 2'b01;
+                end
+            end
+            2'b01: begin
+                if (ip_valid) begin
+                    rgmii_tx_data  <= ip_data;
+                    rgmii_tx_valid <= 1;
+                    tx_state <= 2'b10;
+                end
+            end
+            2'b10: begin
+                if (eth_valid) begin
+                    rgmii_tx_data  <= eth_data;
+                    rgmii_tx_valid <= 1;
+                    tx_state <= 2'b00; // 送信完了後にリセット
+                end
+            end
+        endcase
     end
 
     // RGMII 送信モジュール
     rgmii_tx rgmii_inst (
         .tx_clk(tx_clk),  // RGMII 送信クロック
-        .tx_data(tx_data_reg),
-        .tx_valid(udp_valid | ip_valid | eth_valid),
+        .tx_data(rgmii_tx_data),
+        .tx_valid(rgmii_tx_valid),
         .txd(rgmii_txd),
         .tx_ctl(rgmii_tx_ctl)
     );
