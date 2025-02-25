@@ -68,8 +68,8 @@ module top (
     always @(posedge tx_clk) begin
         case (tx_state)
             2'b00: begin
-                if (udp_valid) begin
-                    rgmii_tx_data  <= udp_data;
+                if (eth_valid) begin
+                    rgmii_tx_data  <= eth_data;
                     rgmii_tx_valid <= 1;
                     tx_state <= 2'b01;
                 end
@@ -82,8 +82,8 @@ module top (
                 end
             end
             2'b10: begin
-                if (eth_valid) begin
-                    rgmii_tx_data  <= eth_data;
+                if (udp_valid) begin
+                    rgmii_tx_data  <= udp_data;
                     rgmii_tx_valid <= 1;
                     tx_state <= 2'b00; // 送信完了後にリセット
                 end
@@ -104,4 +104,3 @@ module top (
     assign rgmii_txc = tx_clk;
 
 endmodule
-
