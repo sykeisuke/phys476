@@ -86,6 +86,7 @@ module top (
     reg [1:0] tx_state;
 
     always @(posedge tx_clk) begin
+        rgmii_tx_valid <= 0;
         case (tx_state)
             2'b00: begin
                 if (eth_valid) begin
