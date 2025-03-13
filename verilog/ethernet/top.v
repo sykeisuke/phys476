@@ -19,6 +19,14 @@ module top (
     wire tx_clk;
     wire locked;
 
+    // CRC32モジュールの信号
+    wire [31:0] crc_value;
+    wire crc_ready;
+
+    reg crc_init;
+    reg crc_calc;
+    reg crc_finish;
+
     // Clocking Wizard のインスタンス
     clk_wiz_0 clk_gen (
         .clk_out1(tx_clk),  // 生成される 125MHz クロック
@@ -29,7 +37,7 @@ module top (
 
     // UDP パケット生成
     udp_sender udp_inst (
-        .clk(clk),
+        .clk(tx_clk),
         .start(ip_valid),
         .udp_data(udp_data),
         .udp_valid(udp_valid)
@@ -37,7 +45,7 @@ module top (
 
     // IP ヘッダー生成
     ip_header ip_inst (
-        .clk(clk),
+        .clk(tx_clk),
         .start(eth_valid),
         .ip_data(ip_data),
         .ip_valid(ip_valid)
@@ -45,15 +53,27 @@ module top (
 
     // Ethernet フレーム生成 (MAC + EtherType)
     ethernet_frame eth_inst (
-        .clk(clk),
+        .clk(tx_clk),
         .start(mdio_ready),  // PHY 初期化完了後に送信開始
         .eth_data(eth_data),
         .eth_valid(eth_valid)
     );
 
+    crc32_ethernet crc_inst (
+        .clk(tx_clk),
+        .rst(rst),
+        .data_valid(rgmii_tx_valid),  // 送信データが有効
+        .data_in(rgmii_tx_data),      // 実際に送信するデータ
+        .crc_init(crc_init),          // 初期化フラグ（パケット開始時にON）
+        .crc_calc(crc_calc),          // 計算を続ける時ON
+        .crc_finish(crc_finish),      // 計算終了・結果取得時にON
+        .crc_out(crc_value),
+        .crc_valid(crc_ready)
+    );
+
     // PHY 初期化 (MDIO 設定)
     mdio_ctrl mdio_inst (
-        .clk(clk),
+        .clk(tx_clk),
         .rst(rst),
         .mdc(mdc),
         .mdio(mdio),
@@ -91,6 +111,9 @@ module top (
         endcase
     end
 
+    // RGMII 送信クロック生成
+    assign rgmii_txc = tx_clk;
+
     // RGMII 送信モジュール
     rgmii_tx rgmii_inst (
         .tx_clk(tx_clk),  // RGMII 送信クロック
@@ -100,7 +123,5 @@ module top (
         .txd(rgmii_txd)
     );
 
-    // RGMII 送信クロック生成
-    assign rgmii_txc = tx_clk;
 
 endmodule
