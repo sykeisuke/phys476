@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 class MLP(object):
     '''
-    Multi-Perceptron
+    Multi-Layer Perceptron
     '''
     def __init__(self, input_dim, hidden_dim, output_dim):
 	# input layer - hidden layer
