@@ -89,7 +89,7 @@ if __name__ == '__main__':
     plt.show()
 
     '''
-    4. Model evaluation
+    5. Model evaluation
     '''
     preds = model(x_test) > 0.5
     acc = accuracy_score(t_test, preds)
