@@ -6,6 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras import optimizers
+from tensorflow.keras.initializers import RandomNormal
 
 import matplotlib.pyplot as plt
 
@@ -26,15 +27,25 @@ if __name__ == '__main__':
     2. Model building
     '''
     model = Sequential()
-    model.add(Dense(3, activation='sigmoid'))
-    model.add(Dense(1, activation='sigmoid'))
+    #model.add(Dense(3, activation='sigmoid'))
+    #model.add(Dense(1, activation='sigmoid'))
+
+    model.add(Dense(3,                        
+                activation='sigmoid',
+                kernel_initializer=RandomNormal(mean=0.0, stddev=1.0, seed=123),
+                bias_initializer='zeros'))         
+    model.add(Dense(1,
+                activation='sigmoid',
+                kernel_initializer=RandomNormal(mean=0.0, stddev=1.0, seed=123),
+                bias_initializer='zeros'))
+
 
     '''
     3. Model learning
     '''
     optimizer = optimizers.SGD(learning_rate=0.1)
     model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
-    model.fit(x_train, t_train, epochs=100, batch_size=30, verbose=1)
+    model.fit(x_train, t_train, epochs=1000, batch_size=10, verbose=1)
 
     '''
     4. Model evaluation
