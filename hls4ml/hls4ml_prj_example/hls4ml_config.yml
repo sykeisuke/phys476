@@ -1,0 +1,80 @@
+Backend: Vivado
+ClockPeriod: 5
+HLSConfig:
+  LayerName:
+    fc1:
+      Precision:
+        bias: fixed<16,9>
+        result: fixed<16,6>
+        weight: fixed<16,9>
+      Trace: false
+    fc1_input:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    fc1_linear:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    fc2:
+      Precision:
+        bias: fixed<16,9>
+        result: fixed<16,6>
+        weight: fixed<16,9>
+      Trace: false
+    fc2_linear:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    fc3:
+      Precision:
+        bias: fixed<16,9>
+        result: fixed<16,6>
+        weight: fixed<16,9>
+      Trace: false
+    fc3_linear:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    output:
+      Precision:
+        bias: fixed<18,9>
+        result: fixed<16,6>
+        weight: fixed<18,9>
+      Trace: false
+    output_linear:
+      Precision:
+        result: fixed<16,6>
+      Trace: false
+    relu1:
+      Precision:
+        result: ufixed<16,0,RND_CONV,SAT>
+      Trace: false
+    relu2:
+      Precision:
+        result: ufixed<16,0,RND_CONV,SAT>
+      Trace: false
+    relu3:
+      Precision:
+        result: ufixed<16,0,RND_CONV,SAT>
+      Trace: false
+    sigmoid:
+      Precision: ap_fixed<16,6>
+      Trace: false
+      exp_table_t: ap_fixed<16,6>
+      inv_table_t: ap_fixed<16,6>
+  Model:
+    BramFactor: 1000000000
+    Precision: fixed<16,6>
+    ReuseFactor: 1
+    Strategy: Latency
+    TraceOutput: false
+IOType: io_parallel
+InputData: my_model_3/Input.dat
+KerasModel: !keras_model 'my_model_3/hls4ml_prj/keras_model.h5'
+OutputDir: my_model_3/hls4ml_prj
+OutputPredictions: my_model_3/Output.dat
+Part: xc7a200tsbg484-1
+ProjectName: myproject
+Stamp: 950a4d99
+Version: 1.0.0
