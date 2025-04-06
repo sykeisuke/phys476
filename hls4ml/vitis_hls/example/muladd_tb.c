@@ -14,7 +14,7 @@ int main()
         b[i] = rand() & 0xffff;
         temp += a[i] * b[i];
         printf("a[%2d]=%04x, b[%2d]=%04x, temp=%08x\n", 
-                i, a[i], b[i], temp)
+                i, a[i], b[i], temp);
     }
 
     if (temp == muladd (a,b)) {
