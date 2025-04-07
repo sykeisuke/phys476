@@ -4,17 +4,14 @@ module muladd_tb;
 
   parameter SIZE = 16;
 
-  // クロック・リセット
   reg clk;
   reg rst;
 
-  // 制御信号
   reg ap_start;
   wire ap_done;
   wire ap_idle;
   wire ap_ready;
 
-  // 入力メモリ信号
   wire [3:0] a_address0;
   wire a_ce0;
   reg [15:0] a_q0;
@@ -23,10 +20,17 @@ module muladd_tb;
   wire b_ce0;
   reg [15:0] b_q0;
 
-  // 出力
   wire [31:0] ap_return;
 
-  // DUTインスタンス（IP名が "muladd_0" の場合）
+  reg [15:0] a_mem [0:SIZE-1];
+  reg [15:0] b_mem [0:SIZE-1];
+
+  reg [31:0] expected;
+  reg [31:0] result;
+  integer i;
+
+  always #5 clk = ~clk;
+
   muladd_0 uut (
     .ap_clk(clk),
     .ap_rst(rst),
@@ -43,23 +47,12 @@ module muladd_tb;
     .ap_return(ap_return)
   );
 
-  // 入力データ
-  reg [15:0] a_mem [0:SIZE-1];
-  reg [15:0] b_mem [0:SIZE-1];
-  reg [31:0] expected;
-  reg [31:0] result;
-
-  // クロック生成
-  always #5 clk = ~clk;
-
   initial begin
-    integer i;
     clk = 0;
     rst = 1;
     ap_start = 0;
     expected = 0;
 
-    // 初期化
     #20;
     rst = 0;
 
@@ -75,15 +68,11 @@ module muladd_tb;
     ap_start = 0;
   end
 
-  // メモリ読み出し（a_q0, b_q0）
   always @ (posedge clk) begin
-    if (a_ce0)
-      a_q0 <= a_mem[a_address0];
-    if (b_ce0)
-      b_q0 <= b_mem[b_address0];
+    if (a_ce0) a_q0 <= a_mem[a_address0];
+    if (b_ce0) b_q0 <= b_mem[b_address0];
   end
 
-  // 結果チェック
   always @ (posedge clk) begin
     if (ap_done) begin
       result <= ap_return;
