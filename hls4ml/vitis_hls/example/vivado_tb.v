@@ -1,31 +1,39 @@
 `timescale 1ns / 1ps
 
-module tb_muladd;
+module muladd_tb;
 
-  reg clk = 0;
-  reg rst = 0;
-  always #5 clk = ~clk;  // 100MHz
+  // Parameters
+  parameter SIZE = 16;
 
-  reg [15:0] a [0:15];
-  reg [15:0] b [0:15];
-  wire [31:0] result;
-  
-  reg ap_start = 0;
+  // Clock and reset
+  reg clk;
+  reg rst;
+
+  // Control signals
+  reg ap_start;
   wire ap_done;
   wire ap_idle;
   wire ap_ready;
 
+  // Inputs
+  reg [15:0] a[0:SIZE-1];
+  reg [15:0] b[0:SIZE-1];
   wire [3:0] a_address0;
-  wire       a_ce0;
-  wire [15:0] a_q0;
-
   wire [3:0] b_address0;
-  wire       b_ce0;
-  wire [15:0] b_q0;
+  wire a_ce0;
+  wire b_ce0;
+  reg [15:0] a_q0;
+  reg [15:0] b_q0;
 
+  // Output
   wire [31:0] ap_return;
 
-  muladd uut (
+  // Reference expected result
+  reg [31:0] expected;
+  reg [31:0] result;
+
+  // Instantiate the DUT
+  muladd_0 dut (
     .ap_clk(clk),
     .ap_rst(rst),
     .ap_start(ap_start),
@@ -41,40 +49,57 @@ module tb_muladd;
     .ap_return(ap_return)
   );
 
-  assign a_q0 = (a_ce0) ? a[a_address0] : 16'd0;
-  assign b_q0 = (b_ce0) ? b[b_address0] : 16'd0;
-  assign result = ap_return;
+  // Clock generation
+  always #5 clk = ~clk;
 
-  integer i;
-  integer expected;
-
+  // Test logic
   initial begin
-    $display("----- Start Simulation -----");
-
+    integer i;
+    clk = 0;
+    rst = 1;
+    ap_start = 0;
     expected = 0;
-    for (i = 0; i < 16; i = i + 1) begin
-      a[i] = i;
-      b[i] = 2*i;
+
+    // Wait for a few cycles
+    #20;
+    rst = 0;
+
+    // Initialize input data
+    for (i = 0; i < SIZE; i = i + 1) begin
+      a[i] = i;       // 0 to 15
+      b[i] = i + 1;   // 1 to 16
       expected = expected + a[i] * b[i];
     end
 
-    rst = 1; #20;
-    rst = 0;
+    // Wait for DUT to be ready
+    #20;
 
     ap_start = 1;
     #10;
     ap_start = 0;
 
-    wait (ap_done == 1);
+    // Feed memory values to DUT
+    while (!ap_done) begin
+      #10;
+      if (a_ce0)
+        a_q0 = a[a_address0];
+      if (b_ce0)
+        b_q0 = b[b_address0];
+    end
 
-    $display("Result: %d", result);
-    $display("Expected: %d", expected);
-    if (result == expected)
+    // Get result
+    result = ap_return;
+    #10;
+    $display("Result = 0x%08x", result);
+    $display("Expected = 0x%08x", expected);
+
+    if (result == expected) begin
       $display("PASS");
-    else
+    end else begin
       $display("FAIL");
+    end
 
-    $finish;
+    $stop;
   end
 
 endmodule
