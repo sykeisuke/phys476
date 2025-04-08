@@ -14,16 +14,16 @@ module muladd_tb;
 
   wire [3:0] a_address0;
   wire a_ce0;
-  reg [15:0] a_q0;
+  reg [31:0] a_q0;
 
   wire [3:0] b_address0;
   wire b_ce0;
-  reg [15:0] b_q0;
+  reg [31:0] b_q0;
 
   wire [31:0] ap_return;
 
-  reg [15:0] a_mem [0:SIZE-1];
-  reg [15:0] b_mem [0:SIZE-1];
+  reg [31:0] a_mem [0:SIZE-1];
+  reg [31:0] b_mem [0:SIZE-1];
 
   reg [31:0] expected;
   reg [31:0] result;
@@ -53,8 +53,8 @@ module muladd_tb;
     ap_start = 0;
     expected = 0;
 
+    #20 rst = 0;
     #20;
-    rst = 0;
 
     for (i = 0; i < SIZE; i = i + 1) begin
       a_mem[i] = i;
@@ -62,10 +62,8 @@ module muladd_tb;
       expected = expected + a_mem[i] * b_mem[i];
     end
 
-    #20;
     ap_start = 1;
-    #10;
-    ap_start = 0;
+    #500 ap_start = 0;
   end
 
   always @ (posedge clk) begin
@@ -88,3 +86,4 @@ module muladd_tb;
   end
 
 endmodule
+
