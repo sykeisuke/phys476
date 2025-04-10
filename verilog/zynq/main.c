@@ -7,31 +7,31 @@
 
 #include "xil_printf.h"
 #include "xil_cache.h"
-#include "xiltimer.h"  // xiltimer ライブラリ
+#include "xiltimer.h"  // xiltimer library
 
-// lwIP のタイマー間隔定義
-#define TCP_TMR_INTERVAL      250    // [ms] TCP タイマー間隔
-#define MY_ARP_TMR_INTERVAL   10000  // [ms] ARP タイマー間隔
+// Timer intervals for lwIP
+#define TCP_TMR_INTERVAL      250    // [ms] TCP timer interval
+#define MY_ARP_TMR_INTERVAL   10000  // [ms] ARP timer interval
 
-// グローバルネットワークインターフェース
+// Global network interface instance
 struct netif server_netif;
-// xiltimer のインスタンス（型は xiltimer.h で定義される XTimer）
+// xiltimer instance (type XTimer defined in xiltimer.h)
 XTimer my_timer;
 
-/ lwIP が利用する現在時刻取得関数 (1ms 単位) /
+/* Time function required by lwIP (returns milliseconds) */
 u32 sys_now(void)
 {
     XTime now;
-    XTime_GetTime(&now);  // マイクロ秒単位を取得
+    XTime_GetTime(&now);  // Get time in microseconds
 #ifndef COUNTS_PER_SECOND
-    // ここは PYNQ-Z2 の PS7 の CPU クロック値（例: 666666687 Hz）
+    // CPU clock frequency of PS7 on PYNQ-Z2 (example: 666666687 Hz)
     #define COUNTS_PER_SECOND 666666687ULL
 #endif
     return (u32)(now / (COUNTS_PER_SECOND / 1000));
 }
 
-/ TCP 受信時のコールバック（エコーバック） /
-static err_t recv_callback(void arg, struct tcp_pcb tpcb, struct pbuf *p, err_t err)
+/* TCP receive callback (echoes back received data) */
+static err_t recv_callback(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
 {
     if (!p) {
         xil_printf("Connection closed.\n");
@@ -44,20 +44,20 @@ static err_t recv_callback(void arg, struct tcp_pcb tpcb, struct pbuf *p, err_t 
     return ERR_OK;
 }
 
-/ TCP 接続受付コールバック /
-static err_t accept_callback(void arg, struct tcp_pcb tpcb, err_t err)
+/* TCP accept callback */
+static err_t accept_callback(void *arg, struct tcp_pcb *tpcb, err_t err)
 {
     xil_printf("Connection accepted.\n");
     tcp_recv(tpcb, recv_callback);
     return ERR_OK;
 }
 
-/ TCP Echo サーバの起動（ポート 7 を使用） /
+/* Start TCP Echo Server on port 7 */
 void start_tcp_echo_server(void)
 {
     struct tcp_pcb *pcb;
     err_t err;
-    
+
     pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
     if (!pcb) {
         xil_printf("Error creating PCB.\n");
@@ -74,7 +74,7 @@ void start_tcp_echo_server(void)
     xil_printf("TCP Echo Server is up.\n");
 }
 
-/ メイン関数 /
+/* Main function */
 int main(void)
 {
     int status;
@@ -83,29 +83,29 @@ int main(void)
 
     xil_printf("\n\r--- lwIP TCP Echo Server using xiltimer ---\n\r");
 
-    / キャッシュ有効化 /
+    /* Enable instruction and data caches */
     Xil_ICacheEnable();
     Xil_DCacheEnable();
 
-    / xiltimer 初期化（xiltimer BSP が有効な状態である前提） /
+    /* Initialize xiltimer (BSP must include xiltimer support) */
     status = XilTickTimer_Init(&my_timer);
     if (status != XST_SUCCESS) {
         xil_printf("XilTickTimer_Init failed.\n\r");
         return -1;
     }
-    // ※ XilTickTimer_Start() は API に存在しない場合が多いため呼ばず、初期化時に自動スタートする前提とします
+    // Note: XilTickTimer_Start() may not exist; assume auto-start after init
 
-    / lwIP スタック初期化 /
+    /* Initialize lwIP stack */
     lwip_init();
 
-    / 固定 IP の設定 /
+    /* Set static IP address */
     IP4_ADDR(&ipaddr, 192, 168, 1, 10);
     IP4_ADDR(&netmask, 255, 255, 255, 0);
     IP4_ADDR(&gw, 192, 168, 1, 1);
 
-    /* ネットワークインターフェース追加
-       - xemacpsif_init() は BSP が提供する初期化関数
-       - etharp_input() は lwIP のレイヤ2入力関数。型が合わない場合はキャスト */
+    /* Add network interface
+       - xemacpsif_init() is BSP-specific init function
+       - etharp_input() is the lwIP Layer 2 input function (cast if needed) */
     extern err_t xemacpsif_init(struct netif *netif);
     netif_add(&server_netif, &ipaddr, &netmask, &gw, NULL,
               xemacpsif_init, (netif_input_fn)etharp_input);
@@ -114,14 +114,14 @@ int main(void)
 
     xil_printf("Network interface up. IP: %s\n\r", ipaddr_ntoa(&ipaddr));
 
-    / TCP Echo サーバ起動 /
+    /* Start the TCP Echo Server */
     start_tcp_echo_server();
 
-    / タイマー初期値取得 /
+    /* Get initial timer values */
     tcp_timer = sys_now();
     arp_timer = sys_now();
 
-    / メインループ /
+    /* Main loop */
     while (1) {
         xemacif_input(&server_netif);
 
@@ -135,7 +135,7 @@ int main(void)
         }
     }
 
-    / 通常はここに到達しない /
+    /* Normally never reached */
     Xil_DCacheDisable();
     Xil_ICacheDisable();
 
