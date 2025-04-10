@@ -1,74 +1,74 @@
 module top (
-    input wire clk,         // 100MHz システムクロック
-    input wire rst,         // リセットボタン
+    input wire clk,         // 100 MHz system clock
+    input wire rst,         // Reset button
 
-    // RGMII 送信インターフェース
+    // RGMII transmit interface
     output wire [3:0] rgmii_txd,
     output wire rgmii_tx_ctl,
     output wire rgmii_txc,
 
-    // MDIO インターフェース (PHY 設定用)
+    // MDIO interface (for PHY configuration)
     output wire mdc,
     inout wire mdio
 );
 
-    // 内部信号
+    // Internal signals
     wire mdio_ready;
     wire [7:0] eth_data, ip_data, udp_data;
     wire eth_valid, ip_valid, udp_valid;
     wire tx_clk;
     wire locked;
 
-    // Clocking Wizard のインスタンス (100MHz → 125MHz)
+    // Clocking Wizard instance (converts 100 MHz to 125 MHz)
     clk_wiz_0 clk_gen (
-        .clk_out1(tx_clk),  // 生成される 125MHz クロック
+        .clk_out1(tx_clk),  // Generated 125 MHz clock
         .reset(rst),
         .locked(locked),
-        .clk_in1(clk)       // FPGA の 100MHz システムクロック
+        .clk_in1(clk)       // 100 MHz system clock from FPGA
     );
 
     //------------------------------------------------
-    // ヘッダー生成モジュール用 Start 信号
+    // Start signals for header generation modules
     //------------------------------------------------
     reg eth_start;
     reg ip_start;
     reg udp_start;
 
     //------------------------------------------------
-    // UDP パケット生成
+    // UDP packet generator
     //------------------------------------------------
     udp_sender udp_inst (
-        .clk(tx_clk),      // クロックを統一
-        .start(udp_start), // start制御を改良
+        .clk(tx_clk),      // Unified clock
+        .start(udp_start), // Improved start control
         .udp_data(udp_data),
         .udp_valid(udp_valid)
     );
 
     //------------------------------------------------
-    // IP ヘッダー生成
+    // IP header generator
     //------------------------------------------------
     ip_header ip_inst (
-        .clk(tx_clk),      // クロックを統一
+        .clk(tx_clk),      // Unified clock
         .start(ip_start),
         .ip_data(ip_data),
         .ip_valid(ip_valid)
     );
 
     //------------------------------------------------
-    // Ethernet フレーム生成 (MAC + EtherType)
+    // Ethernet frame generator (MAC + EtherType)
     //------------------------------------------------
     ethernet_frame eth_inst (
-        .clk(tx_clk),      // クロックを統一
+        .clk(tx_clk),      // Unified clock
         .start(eth_start),
         .eth_data(eth_data),
         .eth_valid(eth_valid)
     );
 
     //------------------------------------------------
-    // PHY 初期化 (MDIO 設定)
+    // PHY initialization (MDIO configuration)
     //------------------------------------------------
     mdio_ctrl mdio_inst (
-        .clk(tx_clk), // クロック統一
+        .clk(tx_clk), // Unified clock
         .rst(rst),
         .mdc(mdc),
         .mdio(mdio),
@@ -76,7 +76,7 @@ module top (
     );
 
     //------------------------------------------------
-    // CRC32 計算用信号
+    // Signals for CRC32 calculation
     //------------------------------------------------
     wire [31:0] crc_value;
     wire crc_ready;
@@ -98,7 +98,7 @@ module top (
     );
 
     //------------------------------------------------
-    // 送信データ管理（RGMIIクロックに同期）
+    // Transmit data control (synchronized with RGMII clock)
     //------------------------------------------------
     reg [7:0] rgmii_tx_data;
     reg rgmii_tx_valid;
@@ -118,19 +118,19 @@ module top (
         end else begin
             case (tx_state)
                 //------------------------------------------------
-                // PHY準備完了 → Ethernetヘッダー送信開始
+                // Wait for PHY ready → start sending Ethernet header
                 //------------------------------------------------
                 4'b0000: begin
                     if (mdio_ready) begin
-                        eth_start       <= 1'b1; // 開始
-                        crc_init        <= 1'b1; // CRC初期化
+                        eth_start       <= 1'b1; // Trigger start
+                        crc_init        <= 1'b1; // Initialize CRC
                         crc_calc        <= 1'b0;
                         crc_finish      <= 1'b0;
                         tx_state        <= 4'b0001;
                     end
                 end
                 //------------------------------------------------
-                // Ethernetヘッダー送信
+                // Send Ethernet header
                 //------------------------------------------------
                 4'b0001: begin
                     crc_init <= 1'b0;
@@ -140,13 +140,13 @@ module top (
                         crc_calc       <= 1'b1;
                     end else begin
                         rgmii_tx_valid <= 1'b0;
-                        eth_start      <= 1'b0; // 完了検知でOFF
-                        ip_start       <= 1'b1; // 次のIPを開始
+                        eth_start      <= 1'b0; // Stop after done
+                        ip_start       <= 1'b1; // Start IP header
                         tx_state       <= 4'b0010;
                     end
                 end
                 //------------------------------------------------
-                // IPヘッダー送信
+                // Send IP header
                 //------------------------------------------------
                 4'b0010: begin
                     if (ip_valid) begin
@@ -155,13 +155,13 @@ module top (
                         crc_calc       <= 1'b1;
                     end else begin
                         rgmii_tx_valid <= 1'b0;
-                        ip_start       <= 1'b0; // 完了
-                        udp_start      <= 1'b1; // 次のUDP開始
+                        ip_start       <= 1'b0; // Done
+                        udp_start      <= 1'b1; // Start UDP
                         tx_state       <= 4'b0011;
                     end
                 end
                 //------------------------------------------------
-                // UDPヘッダー + ペイロード送信
+                // Send UDP header + payload
                 //------------------------------------------------
                 4'b0011: begin
                     if (udp_valid) begin
@@ -170,13 +170,13 @@ module top (
                         crc_calc       <= 1'b1;
                     end else begin
                         rgmii_tx_valid <= 1'b0;
-                        udp_start      <= 1'b0; // 完了
-                        crc_finish     <= 1'b1; // CRC確定
+                        udp_start      <= 1'b0; // Done
+                        crc_finish     <= 1'b1; // Finalize CRC
                         tx_state       <= 4'b0100;
                     end
                 end
                 //------------------------------------------------
-                // CRC送信待機（計算完了待ち）
+                // Wait to send CRC (until calculation completes)
                 //------------------------------------------------
                 4'b0100: begin
                     crc_finish <= 1'b0;
@@ -190,7 +190,7 @@ module top (
                     end
                 end
                 //------------------------------------------------
-                // CRC残り送信
+                // Send remaining CRC bytes
                 //------------------------------------------------
                 4'b0101: begin
                     rgmii_tx_data <= crc_value[15:8];
@@ -203,7 +203,7 @@ module top (
                 4'b0111: begin
                     rgmii_tx_data <= crc_value[31:24];
                     rgmii_tx_valid <= 1'b0;
-                    tx_state      <= 4'b0000; // 初期状態に戻る
+                    tx_state      <= 4'b0000; // Return to initial state
                 end
                 default: begin
                     tx_state      <= 4'b0000;
@@ -213,7 +213,7 @@ module top (
     end
 
     //------------------------------------------------
-    // RGMII送信モジュール
+    // RGMII transmit module
     //------------------------------------------------
     rgmii_tx rgmii_inst (
         .tx_clk(tx_clk),
@@ -223,7 +223,7 @@ module top (
         .txd(rgmii_txd)
     );
 
-    // RGMII 送信クロック出力
+    // RGMII transmit clock output
     assign rgmii_txc = tx_clk;
 
 endmodule
