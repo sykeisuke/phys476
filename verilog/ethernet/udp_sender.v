@@ -5,7 +5,7 @@ module udp_sender (
     output reg udp_valid
 );
 
-    reg [6:0] state; // 拡張したのでビット数を増やす（6ビットで最大64）
+    reg [6:0] state;
 
     always @(posedge clk) begin
         if (start) begin
@@ -15,9 +15,9 @@ module udp_sender (
                 1: begin udp_data <= 8'h88; state <= 2; end                 // Source Port (5000) [LSB]
                 2: begin udp_data <= 8'h13; state <= 3; end                 // Destination Port (5001) [MSB]
                 3: begin udp_data <= 8'h89; state <= 4; end                 // Destination Port (5001) [LSB]
-                4: begin udp_data <= 8'h00; state <= 5; end                 // Length (MSB) → 54バイト = 0x0036
+                4: begin udp_data <= 8'h00; state <= 5; end                 // Length (MSB) → 54byte = 0x0036
                 5: begin udp_data <= 8'h36; state <= 6; end                 // Length (LSB)
-                6: begin udp_data <= 8'h00; state <= 7; end                 // Checksum (MSB) ※0にしておく
+                6: begin udp_data <= 8'h00; state <= 7; end                 // Checksum (MSB) 0
                 7: begin udp_data <= 8'h00; state <= 8; end                 // Checksum (LSB)
 
                 // UDP Payload ("Hello World")
@@ -33,7 +33,7 @@ module udp_sender (
                 17: begin udp_data <= "l"; state <= 18; end
                 18: begin udp_data <= "d"; state <= 19; end
 
-                // パディング：0x00で埋める（46 - 11 = 35バイト）
+                // Padding 0x00 (46 - 11 = 35byte)
                 19: begin udp_data <= 8'h00; state <= 20; end
                 20: begin udp_data <= 8'h00; state <= 21; end
                 21: begin udp_data <= 8'h00; state <= 22; end
@@ -74,7 +74,7 @@ module udp_sender (
                 56: begin udp_data <= 8'h00; state <= 57; end
                 57: begin udp_data <= 8'h00; state <= 58; end
 
-                // 終了
+                // done
                 58: begin udp_valid <= 0; state <= 0; end
             endcase
         end

@@ -1,9 +1,9 @@
 module mdio_ctrl (
-    input wire clk,       // システムクロック
-    input wire rst,       // リセット
-    output reg mdc,       // MDIO クロック
-    inout wire mdio,      // MDIO データ線
-    output reg ready      // 設定完了フラグ
+    input wire clk,       // System Clock 
+    input wire rst,       // Reset
+    output reg mdc,       // MDIO Clock
+    inout wire mdio,      // MDIO Data line
+    output reg ready      // READY when configuration is done
 );
 
     reg [31:0] shift_reg;

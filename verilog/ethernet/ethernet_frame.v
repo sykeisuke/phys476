@@ -10,10 +10,10 @@ module ethernet_frame (
     // Preamble & Start Frame Delimiter (SFD)
     parameter [63:0] preamble = 64'h55_55_55_55_55_55_55_D5; // 7 bytes Preamble + 1 byte SFD
 
-    // Destination MAC (PC側のMACアドレスを指定)
+    // Destination MAC (MAC Address on your PC)
     parameter [47:0] dest_mac = 48'hAA_BB_CC_DD_EE_FF; 
 
-    // Source MAC (FPGAのMACアドレス)
+    // Source MAC (MAC Address on FPGA)
     parameter [47:0] src_mac  = 48'h00_0A_35_01_02_03;
 
     // EtherType (IPv4)
@@ -52,7 +52,7 @@ module ethernet_frame (
                 20: begin eth_data <= ether_type[15:8]; state <= 21; end
                 21: begin eth_data <= ether_type[7:0];  state <= 22; end
 
-                // 完了
+                // Done
                 22: begin eth_valid <= 0; state <= 0; end
             endcase
         end

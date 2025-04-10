@@ -1,7 +1,6 @@
 // ================================
-// 2. CRC32エンディアン反転対応版
+// 2. CRC32 with endian reversal for Ethernet
 // ================================
-
 module crc32_ethernet (
     input wire clk,
     input wire rst,
