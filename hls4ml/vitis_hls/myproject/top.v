@@ -1,15 +1,15 @@
 `timescale 1ns/1ps
 
 module top (
-    input  wire        clk,         // 100 MHz clock
-    input  wire        rst,         // active-high reset
-    input  wire        start,       // start signal
-    input  wire [47:0] fc1_input,   // input vector
-    input  wire        fc1_input_vld, // input valid
+    input  wire        clk,
+    input  wire        rst,
+    input  wire        start,
+    input  wire [47:0] fc1_input,
+    input  wire        fc1_input_vld,
 
-    output wire [15:0] layer13_out,  // output result
-    output wire        layer13_out_vld, // output valid
-    output wire        done         // done flag
+    output wire [15:0] layer13_out,
+    output wire        layer13_out_vld,
+    output wire        done
 );
 
   // internal signals
