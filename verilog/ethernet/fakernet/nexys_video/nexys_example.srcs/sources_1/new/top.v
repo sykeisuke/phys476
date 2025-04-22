@@ -14,7 +14,7 @@ module top
     output wire       phy_tx_ctl,
     output wire       phy_reset_n,
     input  wire       phy_int_n,
-    input  wire       phy_pme_n,
+    //input  wire       phy_pme_n,
     output wire       phy_mdc,
     inout  wire       phy_mdio
     
