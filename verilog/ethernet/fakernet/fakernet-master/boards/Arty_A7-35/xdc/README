@@ -1,0 +1,10 @@
+The file Arty-Master.xdc and License.txt are from
+
+https://github.com/Digilent/digilent-xdc/
+
+Modifications:
+
+- Used pins have been uncommented in Arty-Master.xdc.
+- Changed for array: ledN_r -> led_r[N], same for g and b.
+- Lowercase: CLK100MHZ -> clk100MHz
+- uart_rxd_out -> uart_tx, uart_txd_in -> uart_rx

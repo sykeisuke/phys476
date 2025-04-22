@@ -1,0 +1,6 @@
+fixed_ip      p  1
+mac           x  2
+control_ip    p  3
+control_mask  p  4
+
+int1          d  5

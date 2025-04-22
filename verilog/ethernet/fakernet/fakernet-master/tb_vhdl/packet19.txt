@@ -1,0 +1,88 @@
+SetMAC
+00183e03e4a2
+SetIP
+c0a864c2
+
+# This is SLIP data, i.e. IP packets without ethernet frame.
+ReadSLIP
+
+# Note the 'db dc' encoding of 'c0'...
+
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 45 00 00  54 6e bc 40
+00 40 01 81  d1 db dc a8
+64 08 db dc  a8 64 c2 08
+00 a6 82 db  dc cc 01 72
+c1 62 90 65  00 00 00 00
+77 a3 07 00  00 00 00 00
+10 11 12 13  14 15 16 17
+18 19 1a 1b  1c 1d 1e 1f
+20 21 22 23  24 25 26 27
+28 29 2a 2b  2c 2d 2e 2f
+30 31 32 33  34 35 36 37
+c0
+
+# A packet with a broken escape sequence.
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 45 00 00  db 00 01 02
+Sleep
+
+# A packet with escapes only (incomplete).
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 db dc db  dd c0
+Sleep
+
+# An undersized packet.
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 01 02
+Sleep
+
+# An undersized packet with only one byte.
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 03
+Sleep
+
+# An undersized packet.
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 04 05
+Sleep
+
+# A packet with (only) a broken escape sequence.
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 db 00 01
+Sleep
+
+# A small ICMP packet (needs internal padding).
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 45 00 00  1c db dd 72
+40 00 40 01  15 53 db dc
+a8 64 08 db  dc a8 64 c2
+08 00 54 ed  a3 0c 00 06
+c0
+# Just to let pcap dump end input before the corresponding output comes.
+FinPacket
+
+Sleep
+Sleep
+
+# A small ICMP packet (needs internal padding).
+# NOREPAIR_UDP
+# NOREPAIR_CRC
+c0 45 00 00  20 97 87 40
+00 40 01 59  3a db dc a8
+64 08 db dc  a8 64 c2 08
+00 a1 d5 88  88 00 06 db
+dc db dd 0c  db dc c0
+# Just to let pcap dump end input before the corresponding output comes.
+FinPacket
+
+Sleep
+Sleep

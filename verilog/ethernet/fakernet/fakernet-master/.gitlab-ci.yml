@@ -1,0 +1,34 @@
+stages:
+  - build
+
+###
+# Common tags:
+
+.docker: &docker
+  tags:
+    - docker
+
+# This will be rebuilt by the test target.  We just check that
+# it compiled while the VHDL code is being compiled.
+
+build gcc-latest:
+  stage: build
+  image: gcc:latest
+  script:
+    - echo RUNNER_MAKE_J $RUNNER_MAKE_J
+    - make client  $RUNNER_MAKE_J
+  <<: *docker
+
+# Build the VHDL test bench.
+
+vhdl:
+  stage: build
+  image: ghdl/vunit:gcc
+  script:
+    # - apt-get update -yq > /dev/null
+    # - apt-get install -y --no-install-recommends wireshark-common
+    - ghdl --version
+    - dpkg -l | grep ghdl || true
+    - cc --version || true
+    - make runsim
+  <<: *docker

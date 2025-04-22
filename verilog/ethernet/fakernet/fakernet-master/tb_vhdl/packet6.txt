@@ -1,0 +1,49 @@
+SetMAC
+82abcdef0009
+SetIP
+ac100606
+MaxPayload
+100
+Empty
+
+Packet
+82ab cdef 0009 ac23  0b4f fa85 0800 4500
+002c 0123 4000 ff06  161f ac10 0663 ac10
+0606 9135 0001 3456  ffff 0000 0000 6002
+01e0 6c30 0000 0204  05b4 0000 878e 4a24
+
+FinPacket
+Empty
+Sleep
+
+Packet
+82ab cdef 0009 ac23  0b4f fa85 0800 4500
+002c 0123 4000 ff06  161f ac10 0663 ac10
+0606 9135 0001 3457  0000 0010 0004 6010
+01e0 6c0d 0000 0204  05b4 0000 8e41 7454
+
+FinPacket
+Empty
+Sleep
+Sleep
+
+MakeData
+4
+Sleep
+Sleep
+Sleep
+Sleep
+
+MakeData
+8
+Sleep
+Sleep
+Sleep
+Sleep
+
+MakeData
+200
+Sleep
+Sleep
+Sleep
+Sleep

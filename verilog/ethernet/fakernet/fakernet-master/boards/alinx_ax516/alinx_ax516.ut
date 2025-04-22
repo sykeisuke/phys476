@@ -1,0 +1,3 @@
+-w
+-g TIMER_CFG:0xFFFF
+-g DonePipe:Yes

@@ -1,0 +1,39 @@
+
+#set_global_assignment -name FAMILY "MAX 10"
+#set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE TARGETPART
+set_global_assignment -name TOP_LEVEL_ENTITY tb_timing
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY out
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_1993
+set_global_assignment -name SDC_FILE tb_timing.sdc
+
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_records.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_util_pkg.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_crc32.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_crc32_d32.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_in_state.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_mdio.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_out_state.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_out_pipeline.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_regaccess.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_ram_block_a11d16.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_ram_block_data.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_ram_block_stat.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_regacc_aux_stat.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_tcp_buffer.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_tcp_state.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_tcp_control.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_tcp_prepare.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_dyn_control.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_ntp_query_control.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_mon_pkt_control.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_packet_gen.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_local_reg.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fnet_test_datagen.vhd"
+set_global_assignment -name VHDL_FILE "../../../../../../vhdl/fakernet_module.vhd"
+
+set_global_assignment -name VHDL_FILE "../../../../../../tb_timing/tb_timing.vhd"
+
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 1
+
+#set_global_assignment -name OPTIMIZATION_MODE PERFORMANCE

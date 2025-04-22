@@ -1,0 +1,31 @@
+fixed_ip      p  1
+mac           x  2
+control_ip    p  3
+control_mask  p  4
+text          s  5
+int           d  15
+int1          d  33554431  # Maximum index allowed.
+int2          d  17
+int11         d  18
+int21a        d  19
+int21b        d  20
+
+hex           x  22
+hex1          x  23
+hex2          x  24
+
+tex_5         b  11
+tex__7        b  12
+tex_6         b  13
+tex_61        b  14
+
+text1         s  6
+text12        s  7
+text13        s  8
+text2         s  9
+text22        d  10
+
+abcdefghijklmnopqrstuvwxyz0123456789_a  x  20
+ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_b  x  21
+
+not_accepted  d  77

@@ -1,0 +1,585 @@
+fixed_ip = 192.168.1.1
+mac      = 34:01:02:03:04:05
+VALUE @ 1 : 0000C0A80101
+mac      : ff01fe02fd03
+VALUE @ 2 : 340102030405
+
+fixed_ip = 192.168.1.7;
+VALUE @ 2 : FF01FE02FD03
+VALUE @ 1 : 0000C0A80107
+mac      = 00:01:02:03:04:06;
+VALUE @ 2 : 000102030406
+mac      : ff01fe02fd02;
+VALUE @ 2 : FF01FE02FD02
+
+# Final line.
+DONE
+
+RESET-INPUT-PASS
+
+# Comment at beginning.
+
+fixed_ip = 192.168.1.2
+VALUE @ 1 : 0000C0A80102
+DONE
+
+RESET-INPUT-PASS
+
+
+fixed_ip = x
+FAIL code=10
+
+
+RESET-INPUT-FAIL
+
+fixed_ip = 192.168.1.3
+VALUE @ 1 : 0000C0A80103
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip = 192.168.2.4
+VALUE @ 1 : 0000C0A80204
+DONE
+
+RESET-INPUT-PASS
+
+# Check that spaces are accepted around dots in IP numbers.
+fixed_ip = 192.168. 2.5
+VALUE @ 1 : 0000C0A80205
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip = 192.168.2 .6
+VALUE @ 1 : 0000C0A80206
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip = 192.168. 2 .7
+VALUE @ 1 : 0000C0A80207
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip = 192.168. 3 . # This comment not accepted
+FAIL code=10
+
+RESET-INPUT-FAIL
+
+fixed_ip = 192.168. 3 # This comment not accepted
+.1
+VALUE @ 1 : 000000C0A803 = 12625923
+FAIL code=1
+
+RESET-INPUT-FAIL
+
+fixed_ip = 192.168.3# This comment not accepted
+.1
+VALUE @ 1 : 000000C0A803 = 12625923
+FAIL code=1
+
+RESET-INPUT-FAIL
+
+fixed_ip = 192.168. 4 # This comment accepted
+VALUE @ 1 : 000000C0A804 = 12625924
+DONE
+
+RESET-INPUT-PASS
+
+DONE
+
+RESET-INPUT-PASS
+
+# Tests with comments at various locations in the input
+fixed_ip = # Comment
+192.168.5.1
+VALUE @ 1 : 0000C0A80501
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip =# Comment
+192.168.6.1
+VALUE @ 1 : 0000C0A80601
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip # Comment
+= 192.168.7.1
+VALUE @ 1 : 0000C0A80701
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip# Comment
+=192.168.8.1
+VALUE @ 1 : 0000C0A80801
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip =
+# Comment
+192.168.9.1
+VALUE @ 1 : 0000C0A80901
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip
+# Comment
+=
+192.168.10.1
+VALUE @ 1 : 0000C0A80A01
+DONE
+
+RESET-INPUT-PASS
+
+fixed_ip 
+# Comment (intentional space at end of previous line)
+=
+192.168.11.1
+VALUE @ 1 : 0000C0A80B01
+DONE
+
+RESET-INPUT-PASS
+
+# This tries to jump past characters in the config memory.
+fixed_p = 192.168.12.1
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+# This tries to add another character which does not exist.
+fixed_ipa = 192.168.13.1
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+# Dot at start not accepted.
+fixed_ipa = .168.14.1
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+# Dot at end not accepted.
+fixed_ipa = 192.168.15.
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+int = 192.168.1.3
+VALUE @ 15 : 0000000000C0 = 192
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int = 1
+int = 12
+VALUE @ 15 : 000000000001 = 1
+int = 1234
+VALUE @ 15 : 00000000000C = 12
+int = 12345678
+VALUE @ 15 : 0000000004D2 = 1234
+int = 123456789
+VALUE @ 15 : 000000BC614E = 12345678
+int = 4294967295
+VALUE @ 15 : 0000075BCD15 = 123456789
+VALUE @ 15 : 0000FFFFFFFF
+DONE
+
+RESET-INPUT-PASS
+
+# Just overflow
+int = 4294967296
+FAIL code=11
+
+RESET-INPUT-FAIL
+
+int = 42949672960
+FAIL code=11
+
+RESET-INPUT-FAIL
+
+int = 10000000000
+FAIL code=11
+
+RESET-INPUT-FAIL
+
+int1 = 1
+VALUE @ 33554431 : 000000000001 = 1
+DONE
+
+RESET-INPUT-PASS
+
+int2 = 2
+VALUE @ 17 : 000000000002 = 2
+DONE
+
+RESET-INPUT-PASS
+
+int3 = 3
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+int11 = 11
+VALUE @ 18 : 00000000000B = 11
+DONE
+
+RESET-INPUT-PASS
+
+int21a = 21
+VALUE @ 19 : 000000000015 = 21
+DONE
+
+RESET-INPUT-PASS
+
+int21b = 22
+VALUE @ 20 : 000000000016 = 22
+DONE
+
+RESET-INPUT-PASS
+
+int21 = 21
+FAIL code=5
+
+RESET-INPUT-FAIL
+
+int21 = 22
+FAIL code=5
+
+RESET-INPUT-FAIL
+
+int2 = 2:3
+VALUE @ 17 : 000000000002 = 2
+FAIL code=5
+
+RESET-INPUT-FAIL
+
+int2 = 3:2
+VALUE @ 17 : 000000000003 = 3
+FAIL code=5
+
+RESET-INPUT-FAIL
+
+hex2 = 2:3
+VALUE @ 24 : 000000000023 = 35
+DONE
+
+RESET-INPUT-PASS
+
+hex  = 3:2
+VALUE @ 22 : 000000000032 = 50
+DONE
+
+RESET-INPUT-PASS
+
+# test upper/lowercase match
+Int1 = 1
+VALUE @ 33554431 : 000000000001 = 1
+DONE
+
+RESET-INPUT-PASS
+
+iNt2 = 2
+VALUE @ 17 : 000000000002 = 2
+DONE
+
+RESET-INPUT-PASS
+
+iNT2 = 2
+VALUE @ 17 : 000000000002 = 2
+DONE
+
+RESET-INPUT-PASS
+
+inT3 = 3
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+# Hex shall not accept non-hex characters.
+mac = 0z:01:02:03:04:05
+VALUE @ 2 : 000000000000 = 0
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+mac = 00:01:02:03:04:0g
+VALUE @ 2 : 000010203040 = 270544960
+FAIL code=3
+
+RESET-INPUT-FAIL
+
+mac = g0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+mac = p0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+mac = O0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+mac = G0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+mac = G0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+mac = @0:01:02:03:04:05
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+# Disallow space before and after colon in hex.
+mac = 01 :02:03:04:05:06
+VALUE @ 2 : 000000000001 = 1
+FAIL code=1
+
+RESET-INPUT-FAIL
+
+mac = 01: 02:03:04:05:06
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+# Also no comments.
+mac = 01#
+:02:03:04:05:06
+VALUE @ 2 : 000000000001 = 1
+FAIL code=1
+
+RESET-INPUT-FAIL
+
+mac = 01:#
+FAIL code=8
+02:03:04:05:06
+
+RESET-INPUT-FAIL
+
+int[0] = 2
+int[1] = 3
+VALUE @ 15 : 000000000002 = 2
+int[2] = 5
+VALUE @ 16 : 000000000003 = 3
+int[3] = 4
+VALUE @ 17 : 000000000005 = 5
+int[4]=6
+VALUE @ 18 : 000000000004 = 4
+int [ 5 ] = 7
+VALUE @ 19 : 000000000006 = 6
+int[12] = 1234
+VALUE @ 20 : 000000000007 = 7
+VALUE @ 27 : 0000000004D2 = 1234
+DONE
+
+RESET-INPUT-PASS
+
+int[0 = 2
+FAIL code=6
+
+RESET-INPUT-FAIL
+
+int[ = 2
+FAIL code=6
+
+RESET-INPUT-FAIL
+
+int[] = 2
+FAIL code=6
+
+RESET-INPUT-FAIL
+
+int[0][0] = 2
+FAIL code=0
+
+RESET-INPUT-FAIL
+
+int[9] #comment
+= 4
+int[8]#comment
+VALUE @ 24 : 000000000004 = 4
+= 5
+int[7#comment
+VALUE @ 23 : 000000000005 = 5
+] = 6
+int[#comment
+VALUE @ 22 : 000000000006 = 6
+6] = 7
+int#comment
+VALUE @ 21 : 000000000007 = 7
+[5] = 8
+#comment
+int[4] = 9
+VALUE @ 20 : 000000000008 = 8
+VALUE @ 19 : 000000000009 = 9
+DONE
+
+RESET-INPUT-PASS
+
+int[9] #comment
+ = 4
+int[8] #comment
+VALUE @ 24 : 000000000004 = 4
+ = 5
+int[7 #comment
+VALUE @ 23 : 000000000005 = 5
+ ] = 6
+int[ #comment
+VALUE @ 22 : 000000000006 = 6
+ 6 ] = 7
+int# comment
+VALUE @ 21 : 000000000007 = 7
+[ 5 ] = 8
+ #comment
+int[ 4 ] = 9
+VALUE @ 20 : 000000000008 = 8
+VALUE @ 19 : 000000000009 = 9
+DONE
+
+RESET-INPUT-PASS
+
+abcdefghijklmnopqrstuvwxyz0123456789_a = abcdef098765
+AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_a = 789abcdef012
+VALUE @ 20 : ABCDEF098765
+aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789_a = ba987654000a
+VALUE @ 20 : 789ABCDEF012
+abcdefghijklmnopqrstuvwxyz0123456789_B = 77
+VALUE @ 20 : BA987654000A
+AbCdEfGhIjKlMnOpQrStUvWxYz0123456789_a = 789ABCDEF012
+VALUE @ 21 : 000000000077 = 119
+VALUE @ 20 : 789ABCDEF012
+DONE
+
+RESET-INPUT-PASS
+
+int = 0x0
+VALUE @ 15 : 000000000000 = 0
+DONE
+
+RESET-INPUT-PASS
+
+int = 0x1
+VALUE @ 15 : 000000000001 = 1
+DONE
+
+RESET-INPUT-PASS
+
+int : 0x1
+VALUE @ 15 : 000000000001 = 1
+DONE
+
+RESET-INPUT-PASS
+
+int = 0xa
+VALUE @ 15 : 00000000000A = 10
+DONE
+
+RESET-INPUT-PASS
+
+int2 = 0xa7
+VALUE @ 17 : 0000000000A7 = 167
+DONE
+
+RESET-INPUT-PASS
+
+int = 0x
+FAIL code=8
+
+RESET-INPUT-FAIL
+
+int = x0
+FAIL code=10
+
+RESET-INPUT-FAIL
+
+int = 0xffffffffffff
+VALUE @ 15 : FFFFFFFFFFFF
+DONE
+
+RESET-INPUT-PASS
+
+int = 0x1000000000000 # Overflow
+FAIL code=9
+
+RESET-INPUT-FAIL
+
+# Missing colon or equals
+int a 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int 0 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int x 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int ] 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int . 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int _ 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int 0x0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int 0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+int 0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+not_accepted = 1
+VALUE @ 77 : 000000000001 = 1
+FAIL code=13
+
+RESET-INPUT-FAIL
+
+int = 1
+VALUE @ 15 : 000000000001 = 1
+DONE
+
+RESET-INPUT-PASS
+
+int 0
+FAIL code=7
+
+RESET-INPUT-FAIL
+
+DONE
+END
