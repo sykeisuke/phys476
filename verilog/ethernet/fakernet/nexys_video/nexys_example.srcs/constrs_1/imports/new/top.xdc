@@ -28,6 +28,4 @@ set_property -dict { PACKAGE_PIN Y11  IOSTANDARD LVCMOS25 } [get_ports { phy_txd
 # Reset and Status
 set_property -dict { PACKAGE_PIN U7   IOSTANDARD LVCMOS33 } [get_ports { phy_reset_n }]
 set_property -dict { PACKAGE_PIN Y14  IOSTANDARD LVCMOS25 } [get_ports { phy_int_n }]
-# phy_pme_nのピン指定がない場合は以下をコメントアウトまたは適切に設定
-# set_property -dict { PACKAGE_PIN ?? IOSTANDARD LVCMOS25 } [get_ports { phy_pme_n }]
 
