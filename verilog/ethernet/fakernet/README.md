@@ -7,15 +7,18 @@ This repository provides an implementation of **Fakernet** on the **Nexys Video*
 For general information about Fakernet, please visit:  
 👉 https://fy.chalmers.se/~f96hajo/fakernet/
 
-The control software (`fnetctrl`) can also be downloaded from the above page.
+The control software (`fnetctrl`) is under the `client/` directory, but it can also be downloaded from the website above.
+
+The `lib/` directory contains the core source code of Fakernet. These modules are common to all supported FPGA boards. Some files in `lib/` have been modified or simplified from the original version.
 
 ---
 
 ## IP Configuration
 
-The default IP address is fixed at `192.168.1.192`, as defined in the VHDL source:
+The default IP address is fixed at `192.168.1.192`, as defined in the VHDL source file:
 
 ```vhdl
+-- lib/fakernet/fakernet_top.vhd, line 133
 -- c0a801c0 = 192.168.1.192
 signal ipaddr  : std_logic_vector(31 downto 0) :=
   "11000000" & "10101000" & "00000001" & "11000000";
