@@ -481,9 +481,9 @@ begin
       regacc_pst_done    <= (regacc_int_done  and     int_op) or
                             (regacc_pst2_done and not int_op);
 
-      -- NEW: detect writes at 0x1000–0x1067 and capture into waveform signals
+      -- NEW: detect writes at 0x1000–0x1063 and capture into waveform signals
       if regacc_pre_int_write = '1' then
-        if regacc_pre_addr >= x"1000" and regacc_pre_addr <= x"1067" then
+        if regacc_pre_addr >= x"1000" and regacc_pre_addr <= x"1063" then
           int_wave_wr_en  <= '1';
           int_wave_data   <= regacc_pre_data_wr;
         else

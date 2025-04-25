@@ -17,12 +17,12 @@ void fnet_send_waveform(struct fnet_ctrl_client *client, const char *filename) {
         exit(1);
     }
 
-    float buffer[104];  // One event = 104 float values
+    float buffer[100];  // One event = 100 float values
     int index = 0;
 
     // Read and send each event
-    while (fread(buffer, sizeof(float), 104, fp) == 104) {
-        for (int i = 0; i < 104; i++) {
+    while (fread(buffer, sizeof(float), 100, fp) == 100) {
+        for (int i = 0; i < 100; i++) {
             uint32_t value;
             memcpy(&value, &buffer[i], sizeof(uint32_t));  // Convert float to raw uint32_t bits
 

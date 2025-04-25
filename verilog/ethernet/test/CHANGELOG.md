@@ -2,7 +2,7 @@
 
 ## 🗂️ Data Preparation
 1. **Created `waveform_data_0.bin`**  
-- Each event contains 104 float values  
+- Each event contains 100 float values  
 - Stored as a binary file with 32-bit float values
 
 ---
