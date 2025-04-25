@@ -51,6 +51,10 @@ entity fnet_regaccess is
         regacc_int_done    : in  std_logic;
         regacc_int_cnt     : out std_logic_vector(3 downto 0) := (others=>'0');
 
+        -- waveform FIFO interface (we drive these from internal signals)
+        waveform_fifo_wr_en : out std_logic;
+        waveform_fifo_data  : out std_logic_vector(31 downto 0);
+
         ram_stat_udp_regacc : in ram_stat_block;
         ram_stat_udp_regidp : in ram_stat_block;
         ram_stat_udp_regres : in ram_stat_block_array(0 to NUM_REG_CH-1);
@@ -64,10 +68,6 @@ entity fnet_regaccess is
         dp_ram_udp_regres_porti : in  ram_block_porti_a11d16_array(0 to NUM_REG_CH-1);
         dp_ram_udp_regres_porto : out ram_block_porto_a11d16_array(0 to NUM_REG_CH-1) := (others => rbpo_zero);
         regacc_stat_aux     : in regacc_aux_stat;
-
-        -- waveform port
-        waveform_fifo_wr_en  : out std_logic;
-        waveform_fifo_data   : out std_logic_vector(31 downto 0);
 
         debug_state    : out std_logic_vector(4 downto 0)
         );
@@ -117,6 +117,10 @@ architecture RTL of fnet_regaccess is
   signal regacc_pst2_done  : std_logic := '0';
   signal regacc_pre2_cnt   : std_logic_vector(3 downto 0) := (others => '0');
 
+  -- NEW: Internal waveform capture signals
+  signal int_wave_wr_en : std_logic := '0';
+  signal int_wave_data  : std_logic_vector(31 downto 0) := (others=>'0');
+
   signal read_data : std_logic_vector(31 downto 0) := (others => '0');
   signal done_data : std_logic := '0';
 
@@ -129,10 +133,6 @@ architecture RTL of fnet_regaccess is
   signal wdata_accum_cksum : std_logic_vector(15 downto 0);
 
   signal tmp_wcksum : std_logic_vector(16 downto 0);
-
-  -- For sending waveform data 
-  signal waveform_fifo_wr_en  : std_logic := '0';
-  signal waveform_fifo_data   : std_logic_vector(31 downto 0) := (others => '0');
 
   -- For debugging
   signal state_no : integer := 0;
@@ -481,20 +481,23 @@ begin
       regacc_pst_done    <= (regacc_int_done  and     int_op) or
                             (regacc_pst2_done and not int_op);
 
-      -------- waveform access (104 data points)
-      if regacc_int_write = '1' then
-        if regacc_int_addr >= x"1000" and regacc_int_addr <= x"1067" then
-          waveform_fifo_wr_en  <= '1';
-          waveform_fifo_data   <= regacc_int_data_wr;
+      -- NEW: detect writes at 0x1000–0x1067 and capture into waveform signals
+      if regacc_pre_int_write = '1' then
+        if regacc_pre_addr >= x"1000" and regacc_pre_addr <= x"1067" then
+          int_wave_wr_en  <= '1';
+          int_wave_data   <= regacc_pre_data_wr;
         else
-          waveform_fifo_wr_en  <= '0';
+          int_wave_wr_en  <= '0';
         end if;
       else
-        waveform_fifo_wr_en <= '0';
+        int_wave_wr_en <= '0';
       end if;
-      --------
     end if;
   end process;
+
+  -- now drive the actual FIFO-interface ports from our registered signals:
+  waveform_fifo_wr_en <= int_wave_wr_en;
+  waveform_fifo_data  <= int_wave_data;
 
   ram_cons_udp_regacc.clear_hasdata <= a.done;
   ram_prod_udp_regidp.set_hasdata <=
