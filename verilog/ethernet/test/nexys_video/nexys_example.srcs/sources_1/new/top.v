@@ -300,8 +300,10 @@ wire hls4ml_done;
 wire hls4ml_idle;
 wire hls4ml_ready;
 
-reg [31:0] hls4ml_input_data [0:99];
-wire [31:0] hls4ml_output_data [0:3];
+reg [31:0] hls4ml_input_data_array [0:99]; // ← intermediate (32bit × 100)
+wire [3199:0] hls4ml_input_data_flat;       // ← To HLS4ML IP (3200bit)
+
+wire [127:0] hls4ml_output_data_flat;       // ← From HLS4ML IP (128bit)
 
 reg [6:0] read_count;
 
@@ -313,7 +315,7 @@ always @(posedge clk_int) begin
     end else if (!fifo_empty) begin
         if (read_count < 100) begin
             fifo_rd_en <= 1;
-            hls4ml_input_data[read_count] <= fifo_dout;
+            hls4ml_input_data_array[read_count] <= fifo_dout;
             read_count <= read_count + 1;
         end else begin
             fifo_rd_en <= 0;
@@ -326,6 +328,14 @@ always @(posedge clk_int) begin
     end
 end
 
+genvar i;
+generate
+    for (i = 0; i < 100; i = i + 1) begin : flatten_input
+        assign hls4ml_input_data_flat[i*32 +: 32] = hls4ml_input_data_array[i];
+    end
+endgenerate
+
+// FIFO instance
 fifo_generator_0 fifo_inst (
     .wr_clk(clk_int),
     .rd_clk(clk_int),
@@ -338,6 +348,7 @@ fifo_generator_0 fifo_inst (
     .empty(fifo_empty)
 );
 
+// HLS4ML IP instance
 dummy_hls4ml_ip hls4ml_inst (
     .ap_clk(clk_int),
     .ap_rst_n(1'b1),
@@ -345,9 +356,8 @@ dummy_hls4ml_ip hls4ml_inst (
     .ap_done(hls4ml_done),
     .ap_idle(hls4ml_idle),
     .ap_ready(hls4ml_ready),
-    .input_data(hls4ml_input_data),
-    .output_data(hls4ml_output_data)
+    .input_data_flat(hls4ml_input_data_flat),
+    .output_data_flat(hls4ml_output_data_flat)
 );
-
 
 endmodule

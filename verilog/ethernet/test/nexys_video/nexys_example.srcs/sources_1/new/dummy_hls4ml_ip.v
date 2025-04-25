@@ -7,22 +7,8 @@ module dummy_hls4ml_ip (
     output reg ap_idle,
     output reg ap_ready,
 
-    input wire [31:0] input_data_flat [0:99], // NGなので修正
-    output reg [31:0] output_data_flat [0:3]  // NGなので修正
-);
-
-// 修正版
-module dummy_hls4ml_ip (
-    input wire ap_clk,
-    input wire ap_rst_n,
-
-    input wire ap_start,
-    output reg ap_done,
-    output reg ap_idle,
-    output reg ap_ready,
-
-    input wire [3199:0] input_data_flat, // 100個 x 32bit = 3200bit
-    output reg [127:0] output_data_flat   // 4個 x 32bit = 128bit
+    input wire [3199:0] input_data_flat, // 100 x 32bit = 3200bit
+    output reg [127:0] output_data_flat   // 4 x 32bit = 128bit
 );
 
 reg processing;
