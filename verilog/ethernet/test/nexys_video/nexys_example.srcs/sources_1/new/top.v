@@ -3,9 +3,7 @@ module top
 (
     input  wire       clk,
 
-    /*
-     * Ethernet: 1000BASE-T RGMII
-     */
+    //Ethernet: 1000BASE-T RGMII
     input  wire       phy_rx_clk,
     input  wire [3:0] phy_rxd,
     input  wire       phy_rx_ctl,
@@ -21,9 +19,8 @@ module top
 );
 
 
-
+// Clock Management
 wire clk_ibufg;
-
 // Internal 125 MHz clock
 wire clk_mmcm_out;
 wire clk_int;   
@@ -293,6 +290,64 @@ fakernet_top fakernet_top_inst (
 
     );
 
+// FIFO and dummy HLS4ML IP connection
+wire [31:0] fifo_dout;
+reg fifo_rd_en;
+wire fifo_empty;
+
+reg hls4ml_start;
+wire hls4ml_done;
+wire hls4ml_idle;
+wire hls4ml_ready;
+
+reg [31:0] hls4ml_input_data [0:99];
+wire [31:0] hls4ml_output_data [0:3];
+
+reg [6:0] read_count;
+
+always @(posedge clk_int) begin
+    if (data_reset) begin
+        fifo_rd_en <= 0;
+        hls4ml_start <= 0;
+        read_count <= 0;
+    end else if (!fifo_empty) begin
+        if (read_count < 100) begin
+            fifo_rd_en <= 1;
+            hls4ml_input_data[read_count] <= fifo_dout;
+            read_count <= read_count + 1;
+        end else begin
+            fifo_rd_en <= 0;
+            hls4ml_start <= 1;
+            read_count <= 0;
+        end
+    end else begin
+        fifo_rd_en <= 0;
+        hls4ml_start <= 0;
+    end
+end
+
+fifo_generator_0 fifo_inst (
+    .wr_clk(clk_int),
+    .rd_clk(clk_int),
+    .rst(data_reset),
+    .din(data_word),
+    .wr_en(data_write),
+    .rd_en(fifo_rd_en),
+    .dout(fifo_dout),
+    .full(),
+    .empty(fifo_empty)
+);
+
+dummy_hls4ml_ip hls4ml_inst (
+    .ap_clk(clk_int),
+    .ap_rst_n(1'b1),
+    .ap_start(hls4ml_start),
+    .ap_done(hls4ml_done),
+    .ap_idle(hls4ml_idle),
+    .ap_ready(hls4ml_ready),
+    .input_data(hls4ml_input_data),
+    .output_data(hls4ml_output_data)
+);
 
 
 endmodule
