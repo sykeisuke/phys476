@@ -234,6 +234,10 @@ architecture RTL of efb_common_top is
   signal mdio_out   : std_logic;
   signal mdio_ena   : std_logic;
 
+  -- Waveform data
+  signal waveform_data_in : std_logic_vector(31 downto 0);
+  signal waveform_wr_en   : std_logic;
+
   -----------------------------------------
   -- User button, switch and LED signals --
   -----------------------------------------
@@ -1050,6 +1054,9 @@ begin
       reg_read        => regacc_read,
       reg_done        => regacc_done,
       reg_cnt         => regacc_cnt,
+      -- Waveform data
+      waveform_data_in   => waveform_data_in,
+      waveform_wr_en     => waveform_wr_en,
       -- Data input interface
       data_word       => data_word,
       data_offset     => data_offset,

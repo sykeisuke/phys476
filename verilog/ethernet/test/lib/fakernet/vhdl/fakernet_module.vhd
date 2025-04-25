@@ -89,6 +89,9 @@ entity fakernet_module is
         reg_read       : out std_logic;
         reg_done       : in  std_logic;
         reg_cnt        : out std_logic_vector(3 downto 0);
+        -- Waveform port
+        waveform_data_in   : out std_logic_vector(31 downto 0);
+        waveform_wr_en     : out std_logic;
         -- Data input interface
         data_word      : in  std_logic_vector(31 downto 0);
         data_offset    : in  std_logic_vector;
@@ -596,6 +599,10 @@ begin
       tc_lcl_datagen_len_mask => tc_lcl_datagen_len_mask,
       tc_lcl_datagen_mark     => tc_lcl_datagen_mark
       );
+
+  -- User waveform write logic
+  waveform_data_in <= reg_int_data_wr;
+  waveform_wr_en   <= '1' when reg_int_write = '1' and reg_int_addr = x"0001000" else '0';
 
   tcp_reset <= int_tcp_reset;
 

@@ -65,6 +65,10 @@ entity fnet_regaccess is
         dp_ram_udp_regres_porto : out ram_block_porto_a11d16_array(0 to NUM_REG_CH-1) := (others => rbpo_zero);
         regacc_stat_aux     : in regacc_aux_stat;
 
+        -- waveform port
+        waveform_fifo_wr_en  : out std_logic;
+        waveform_fifo_data   : out std_logic_vector(31 downto 0);
+
         debug_state    : out std_logic_vector(4 downto 0)
         );
 end fnet_regaccess;
@@ -125,6 +129,10 @@ architecture RTL of fnet_regaccess is
   signal wdata_accum_cksum : std_logic_vector(15 downto 0);
 
   signal tmp_wcksum : std_logic_vector(16 downto 0);
+
+  -- For sending waveform data 
+  signal waveform_fifo_wr_en  : std_logic := '0';
+  signal waveform_fifo_data   : std_logic_vector(31 downto 0) := (others => '0');
 
   -- For debugging
   signal state_no : integer := 0;
@@ -472,6 +480,19 @@ begin
 
       regacc_pst_done    <= (regacc_int_done  and     int_op) or
                             (regacc_pst2_done and not int_op);
+
+      -------- waveform access (104 data points)
+      if regacc_int_write = '1' then
+        if regacc_int_addr >= x"1000" and regacc_int_addr <= x"1067" then
+          waveform_fifo_wr_en  <= '1';
+          waveform_fifo_data   <= regacc_int_data_wr;
+        else
+          waveform_fifo_wr_en  <= '0';
+        end if;
+      else
+        waveform_fifo_wr_en <= '0';
+      end if;
+      --------
     end if;
   end process;
 
