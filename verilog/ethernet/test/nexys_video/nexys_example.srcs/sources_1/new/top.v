@@ -300,10 +300,9 @@ wire hls4ml_done;
 wire hls4ml_idle;
 wire hls4ml_ready;
 
-reg [31:0] hls4ml_input_data_array [0:99]; // ← intermediate (32bit × 100)
-wire [3199:0] hls4ml_input_data_flat;       // ← To HLS4ML IP (3200bit)
-
-wire [127:0] hls4ml_output_data_flat;       // ← From HLS4ML IP (128bit)
+reg [31:0] hls4ml_input_data_array [0:99]; // intermediate (32bit × 100)
+wire [3199:0] hls4ml_input_data_flat; 
+wire [127:0] hls4ml_output_data_flat; 
 
 reg [6:0] read_count;
 
@@ -337,9 +336,8 @@ endgenerate
 
 // FIFO instance
 fifo_generator_0 fifo_inst (
-    .wr_clk(clk_int),
-    .rd_clk(clk_int),
-    .rst(data_reset),
+    .clk(clk_int),
+    .srst(data_reset),
     .din(data_word),
     .wr_en(data_write),
     .rd_en(fifo_rd_en),
