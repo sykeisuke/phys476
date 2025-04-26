@@ -242,7 +242,6 @@ wire        regaccess_waveform_wr_en;
 
 fnet_regaccess u_fnet_regaccess (
     .clk(clk_int),
-    .rst(data_reset),
     .waveform_fifo_data(regaccess_waveform_data),
     .waveform_fifo_wr_en(regaccess_waveform_wr_en)
 );
@@ -420,5 +419,14 @@ always @(posedge clk_int) begin
         end
     end
 end
+
+ila_0 ila_inst (
+  .clk(clk_int),
+  .probe0(waveform_wr_en),
+  .probe1(waveform_data_in),
+  .probe2(fifo_empty),
+  .probe3(hls4ml_start),
+  .probe4(hls4ml_done)
+);
 
 endmodule
