@@ -237,6 +237,11 @@ assign phy_mdc = phy_mdc_i;
 wire phy_mdio_out;
 assign phy_mdio = phy_mdio_out;
 
+// waveform data input signals
+wire [31:0] waveform_data_in;
+wire        waveform_wr_en;
+
+// fakernet_top instantiation
 fakernet_top fakernet_top_inst (
     .clk_in (clk_int),
     .clk125_in (clk_int),
@@ -280,15 +285,18 @@ fakernet_top fakernet_top_inst (
     .jd3    (),
     .uart_rx (),
     .uart_tx (),
+    
     .user_data_word       (data_word),
     .user_data_offset     (data_offset),
     .user_data_write      (data_write),
     .user_data_commit_len (data_commit_len),
     .user_data_commit     (data_commit),
     .user_data_free       (data_free),
-    .user_data_reset      (data_reset)
+    .user_data_reset      (data_reset),
 
-    );
+    .waveform_data_in     (waveform_data_in), 
+    .waveform_wr_en       (waveform_wr_en)
+);
 
 // FIFO and dummy HLS4ML IP connection
 wire [31:0] fifo_dout;
@@ -300,9 +308,9 @@ wire hls4ml_done;
 wire hls4ml_idle;
 wire hls4ml_ready;
 
-reg [31:0] hls4ml_input_data_array [0:99]; // intermediate (32bit × 100)
-wire [3199:0] hls4ml_input_data_flat; 
-wire [127:0] hls4ml_output_data_flat; 
+reg [31:0] hls4ml_input_data_array [0:99]; // intermediate array
+wire [3199:0] hls4ml_input_data_flat;      // flatten version (32*100)
+wire [127:0] hls4ml_output_data_flat;      // dummy output (32*4)
 
 reg [6:0] read_count;
 
@@ -327,6 +335,7 @@ always @(posedge clk_int) begin
     end
 end
 
+// Flatten input data array for HLS4ML IP
 genvar i;
 generate
     for (i = 0; i < 100; i = i + 1) begin : flatten_input
@@ -334,19 +343,20 @@ generate
     end
 endgenerate
 
-// FIFO instance
+// FIFO instance (write waveform data, read for hls4ml)
 fifo_generator_0 fifo_inst (
-    .clk(clk_int),
-    .srst(data_reset),
-    .din(data_word),
-    .wr_en(data_write),
+    .wr_clk(clk_int),
+    .rd_clk(clk_int),
+    .rst(data_reset),
+    .din(waveform_data_in),
+    .wr_en(waveform_wr_en),
     .rd_en(fifo_rd_en),
     .dout(fifo_dout),
     .full(),
     .empty(fifo_empty)
 );
 
-// HLS4ML IP instance
+// HLS4ML dummy IP instance
 dummy_hls4ml_ip hls4ml_inst (
     .ap_clk(clk_int),
     .ap_rst_n(1'b1),
@@ -357,5 +367,47 @@ dummy_hls4ml_ip hls4ml_inst (
     .input_data_flat(hls4ml_input_data_flat),
     .output_data_flat(hls4ml_output_data_flat)
 );
+
+// HLS4ML output return logic
+reg [1:0] send_count;
+reg sending_result;
+reg [31:0] hls4ml_output_data_array [0:3]; // 32bit × 4 outputs
+
+always @(posedge clk_int) begin
+    if (data_reset) begin
+        send_count <= 0;
+        sending_result <= 0;
+        user_data_write <= 0;
+        user_data_commit <= 0;
+    end else begin
+        if (hls4ml_done && !sending_result) begin
+            // Start sending after HLS4ML done
+            sending_result <= 1;
+            send_count <= 0;
+
+            hls4ml_output_data_array[0] <= hls4ml_output_data_flat[31:0];
+            hls4ml_output_data_array[1] <= hls4ml_output_data_flat[63:32];
+            hls4ml_output_data_array[2] <= hls4ml_output_data_flat[95:64];
+            hls4ml_output_data_array[3] <= hls4ml_output_data_flat[127:96];
+        end
+
+        if (sending_result) begin
+            if (send_count < 4) begin
+                user_data_word <= hls4ml_output_data_array[send_count];
+                user_data_offset <= send_count;
+                user_data_write <= 1;
+                user_data_commit <= 0;
+                send_count <= send_count + 1;
+            end else begin
+                user_data_write <= 0;
+                user_data_commit <= 1;
+                sending_result <= 0;
+            end
+        end else begin
+            user_data_write <= 0;
+            user_data_commit <= 0;
+        end
+    end
+end
 
 endmodule
