@@ -247,6 +247,10 @@ end Component;
   signal spy_tx_en          : std_logic;
   signal spy_txd            : std_logic_vector(7 downto 0);
   
+  -- waveform signals
+  signal waveform_fifo_data  : std_logic_vector(31 downto 0);
+  signal waveform_fifo_wr_en : std_logic;
+
 begin
 
   -- waveform  
