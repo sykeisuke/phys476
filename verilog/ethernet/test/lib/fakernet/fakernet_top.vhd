@@ -113,7 +113,11 @@ entity fakernet_top is
     user_data_commit_len : in std_logic_vector( 10 downto 0);
     user_data_commit     : in std_logic;
     user_data_free       : out  std_logic;
-    user_data_reset      : out  std_logic
+    user_data_reset      : out  std_logic;
+
+    -- waveform
+    waveform_data_in : in  std_logic_vector(31 downto 0); 
+    waveform_wr_en   : in  std_logic
 
     );
 
@@ -244,6 +248,10 @@ end Component;
   signal spy_txd            : std_logic_vector(7 downto 0);
   
 begin
+
+  -- waveform  
+  waveform_fifo_data <= waveform_data_in;
+  waveform_fifo_wr_en <= waveform_wr_en;
 
   -----------------------
   -- Clock generation. --

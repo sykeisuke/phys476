@@ -210,26 +210,26 @@ wire phy_mdc_i;
 
     wire [7:0] countdebug;
     wire [19:0] statedebug;
-    wire [31:0] data_word;
-    wire [9:0] data_offset;
+    reg [31:0] data_word;
+    reg [9:0] data_offset;
     wire [10:0] data_commit_len;
-    wire data_write;
-    wire data_commit;
+    reg data_write;
+    reg data_commit;
     wire data_free;
     wire data_reset;
 
-    data_gen_user data_gen_user_inst (
+//    data_gen_user data_gen_user_inst (
     
-    .clk  (clk_int),
-    .event_word       (data_word),
-    .event_offset     (data_offset),
-    .event_write      (data_write),
-    .event_commit_len (data_commit_len),
-    .event_commit     (data_commit),
-    .event_free       (data_free),
-    .event_reset      (data_reset)
+//    .clk  (clk_int),
+//    .event_word       (data_word),
+//    .event_offset     (data_offset),
+//    .event_write      (data_write),
+//    .event_commit_len (data_commit_len),
+//    .event_commit     (data_commit),
+//    .event_free       (data_free),
+//    .event_reset      (data_reset)
     
-    );
+//    );
 
 
 assign phy_mdc = phy_mdc_i;
@@ -345,9 +345,8 @@ endgenerate
 
 // FIFO instance (write waveform data, read for hls4ml)
 fifo_generator_0 fifo_inst (
-    .wr_clk(clk_int),
-    .rd_clk(clk_int),
-    .rst(data_reset),
+    .clk(clk_int),
+    .srst(data_reset),
     .din(waveform_data_in),
     .wr_en(waveform_wr_en),
     .rd_en(fifo_rd_en),
