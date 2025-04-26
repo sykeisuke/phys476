@@ -377,8 +377,8 @@ always @(posedge clk_int) begin
     if (data_reset) begin
         send_count <= 0;
         sending_result <= 0;
-        user_data_write <= 0;
-        user_data_commit <= 0;
+        data_write <= 0;
+        data_commit <= 0;
     end else begin
         if (hls4ml_done && !sending_result) begin
             // Start sending after HLS4ML done
@@ -393,19 +393,19 @@ always @(posedge clk_int) begin
 
         if (sending_result) begin
             if (send_count < 4) begin
-                user_data_word <= hls4ml_output_data_array[send_count];
-                user_data_offset <= send_count;
-                user_data_write <= 1;
-                user_data_commit <= 0;
+                data_word <= hls4ml_output_data_array[send_count];
+                data_offset <= send_count;
+                data_write <= 1;
+                data_commit <= 0;
                 send_count <= send_count + 1;
             end else begin
-                user_data_write <= 0;
-                user_data_commit <= 1;
+                data_write <= 0;
+                data_commit <= 1;
                 sending_result <= 0;
             end
         end else begin
-            user_data_write <= 0;
-            user_data_commit <= 0;
+            data_write <= 0;
+            data_commit <= 0;
         end
     end
 end
