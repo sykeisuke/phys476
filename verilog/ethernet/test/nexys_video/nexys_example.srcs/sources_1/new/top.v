@@ -236,21 +236,9 @@ assign phy_mdc = phy_mdc_i;
 wire phy_mdio_out;
 assign phy_mdio = phy_mdio_out;
 
-// UDP register access
-wire [31:0] regaccess_waveform_data;
-wire        regaccess_waveform_wr_en;
-
-fnet_regaccess u_fnet_regaccess (
-    .clk(clk_int),
-    .waveform_data_in(regaccess_waveform_data),
-    .waveform_wr_en(regaccess_waveform_wr_en)
-);
-
 // waveform data input signals
-//wire [31:0] waveform_data_in;
-//wire        waveform_wr_en;
-assign waveform_data_in = regaccess_waveform_data;
-assign waveform_wr_en   = regaccess_waveform_wr_en;
+wire [31:0] waveform_data_in;
+wire        waveform_wr_en;
 
 // fakernet_top instantiation
 fakernet_top fakernet_top_inst (

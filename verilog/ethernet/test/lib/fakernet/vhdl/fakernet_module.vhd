@@ -90,8 +90,8 @@ entity fakernet_module is
         reg_done       : in  std_logic;
         reg_cnt        : out std_logic_vector(3 downto 0);
         -- Waveform port
-        waveform_data_in   : out std_logic_vector(31 downto 0);
-        waveform_wr_en     : out std_logic;
+        waveform_data_in   : in std_logic_vector(31 downto 0);
+        waveform_wr_en     : in std_logic;
         -- Data input interface
         data_word      : in  std_logic_vector(31 downto 0);
         data_offset    : in  std_logic_vector;
