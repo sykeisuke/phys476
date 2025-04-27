@@ -22,22 +22,23 @@ void fnet_send_waveform(struct fnet_ctrl_client *client, const char *filename) {
 
     // Read and send each event
     while (fread(buffer, sizeof(float), 100, fp) == 100) {
-        for (int i = 0; i < 100; i++) {
-            uint32_t value;
-            memcpy(&value, &buffer[i], sizeof(uint32_t));  // Convert float to raw uint32_t bits
-
-            // Send each value to FPGA register address 0x1000 + i
-            fnet_ctrl_write_register(client, 0x1000 + i, value);
+        for (int i = 0; i < 100; i += 10) {
+            for (int j = 0; j < 10; j++) {
+                uint32_t value;
+                memcpy(&value, &buffer[i+j], sizeof(uint32_t));
+                fnet_ctrl_write_register(client, 0x1000 + (i+j), value);
+            }
+            // usleep(1000); 
         }
 
-        // Optionally write a trigger register to indicate event completion
-        fnet_ctrl_write_register(client, 0x1FFF, index++);  // Dummy write to indicate event
+        fnet_ctrl_write_register(client, 0x1FFF, index++);
     }
 
     fclose(fp);
     printf("Finished sending waveform data.\n");
 }
 
+// Single register write (for example trigger)
 void fnet_ctrl_write_register(struct fnet_ctrl_client *client,
                               uint32_t reg_addr,
                               uint32_t reg_value) {
@@ -54,3 +55,4 @@ void fnet_ctrl_write_register(struct fnet_ctrl_client *client,
         exit(1);
     }
 }
+

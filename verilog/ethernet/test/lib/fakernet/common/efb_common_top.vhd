@@ -140,8 +140,10 @@ entity efb_common_top is
     user_data_commit_len : in std_logic_vector( 10 downto 0);
     user_data_commit     : in std_logic;
     user_data_free       : out  std_logic;
-    user_data_reset      : out  std_logic
-
+    user_data_reset      : out  std_logic;
+    -- Waveform data
+    waveform_data_in     : in  std_logic_vector(31 downto 0);
+    waveform_wr_en       : in  std_logic
     );
 
 end efb_common_top;
@@ -233,10 +235,6 @@ architecture RTL of efb_common_top is
   signal mdio_in    : std_logic := '0';
   signal mdio_out   : std_logic;
   signal mdio_ena   : std_logic;
-
-  -- Waveform data
-  signal waveform_data_in : std_logic_vector(31 downto 0);
-  signal waveform_wr_en   : std_logic;
 
   -----------------------------------------
   -- User button, switch and LED signals --
