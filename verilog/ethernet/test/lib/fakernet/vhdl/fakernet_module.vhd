@@ -554,6 +554,11 @@ begin
       dp_ram_udp_regres_porto => dp_ram_udp_regres_port_a_o_tmp,
       --
       regacc_stat_aux => regacc_aux_info.stat,
+
+      -- waveform
+      waveform_data_in => waveform_data_in, 
+      waveform_wr_en => waveform_wr_en,
+
       --
       debug_state => debug_state_regacc
       );
@@ -600,9 +605,6 @@ begin
       tc_lcl_datagen_mark     => tc_lcl_datagen_mark
       );
 
-  -- User waveform write logic
-  waveform_data_in <= reg_int_data_wr;
-  waveform_wr_en   <= '1' when reg_int_write = '1' and reg_int_addr = x"0001000" else '0';
 
   tcp_reset <= int_tcp_reset;
 

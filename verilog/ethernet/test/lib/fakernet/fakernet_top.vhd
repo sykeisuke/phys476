@@ -503,9 +503,9 @@ begin
     user_data_commit_len => user_data_commit_len,
     user_data_commit     => user_data_commit,
     user_data_free       => user_data_free,
-    user_data_reset      => user_data_reset
-    waveform_fifo_data => waveform_data_in,
-    waveform_fifo_wr_en   => waveform_wr_en
+    user_data_reset      => user_data_reset,
+    waveform_data_in => waveform_data_in,
+    waveform_wr_en   => waveform_wr_en
 
       );
 

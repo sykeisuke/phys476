@@ -242,8 +242,8 @@ wire        regaccess_waveform_wr_en;
 
 fnet_regaccess u_fnet_regaccess (
     .clk(clk_int),
-    .waveform_fifo_data(regaccess_waveform_data),
-    .waveform_fifo_wr_en(regaccess_waveform_wr_en)
+    .waveform_data_in(regaccess_waveform_data),
+    .waveform_wr_en(regaccess_waveform_wr_en)
 );
 
 // waveform data input signals
