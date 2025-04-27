@@ -16,19 +16,25 @@ void fnet_send_waveform(struct fnet_ctrl_client *client, const char *filename) {
         perror("Failed to open waveform file");
         exit(1);
     }
+    printf("Opened waveform file successfully!\n");
 
     float buffer[100];  // One event = 100 float values
     int index = 0;
 
     // Read and send each event
     while (fread(buffer, sizeof(float), 100, fp) == 100) {
-        for (int i = 0; i < 100; i += 10) {
-            for (int j = 0; j < 10; j++) {
-                uint32_t value;
-                memcpy(&value, &buffer[i+j], sizeof(uint32_t));
-                fnet_ctrl_write_register(client, 0x1000 + (i+j), value);
-            }
+//        for (int i = 0; i < 100; i += 10) {
+//            for (int j = 0; j < 10; j++) {
+//                uint32_t value;
+//                memcpy(&value, &buffer[i+j], sizeof(uint32_t));
+//                fnet_ctrl_write_register(client, 0x1000 + (i+j), value);
+//            }
             // usleep(1000); 
+//        }
+        for (int i = 0; i < 100; i++) {
+            uint32_t value;
+            memcpy(&value, &buffer[i], sizeof(uint32_t));
+            fnet_ctrl_write_register(client, 0x1000 + i, value); 
         }
 
         fnet_ctrl_write_register(client, 0x1FFF, index++);
@@ -48,6 +54,7 @@ void fnet_ctrl_write_register(struct fnet_ctrl_client *client,
 
     send[0].addr = htonl(FAKERNET_REG_ACCESS_ADDR_WRITE | reg_addr);
     send[0].data = htonl(reg_value);
+    printf("addr=0x%08X data=0x%08X\n", FAKERNET_REG_ACCESS_ADDR_WRITE | reg_addr, reg_value);
 
     int ret = fnet_ctrl_send_recv_regacc(client, num_send);
     if (ret != 1) {

@@ -87,7 +87,7 @@ int main(int argc, char **argv)
   const char *error_ptr;
   char *end;
 
-  char *hostname;
+  char *hostname = NULL;
   int do_stat = 0;
   int do_tcp_reset = 0;
   int do_tcp_read = 0;
@@ -144,6 +144,7 @@ int main(int argc, char **argv)
 
   lcl_func_mon_info._xadc._prev_max_ch = (uint32_t) -1;
 
+  hostname = NULL;
   for (i = 1; i < argc; i++)
     {
       if (strcmp(argv[i],"--help") == 0)
@@ -333,17 +334,33 @@ int main(int argc, char **argv)
 	      exit(1);
 	    }
 	}
-      else
-	{
-	  hostname = argv[i];
+      /* non-option: hostname (only once) */
+      else if (argv[i][0] != '-') {
+          fprintf(stderr, "Unknown option: %s\n", argv[i]);
+          fnet_ctrl_usage(argv[0]);
+          exit(1);
+      }
+      else if (hostname == NULL) {
+        hostname = argv[i];
+      }
+      /* unknown option */
+      else {
+        fprintf(stderr, "Unknown option: %s\n", argv[i]);
+        fnet_ctrl_usage(argv[0]);
+        exit(1);
+      }
+  }
+//      else
+//	{
+//	  hostname = argv[i];
 	  /*
 	    fprintf (stderr, "Unhandled argument '%s'.\n", argv[i]);
 	    exit(1);
 	  */
-	}
-    }
+//	}
+//    }
 
-  if (!hostname)
+  if (hostname == NULL)
     {
       fnet_ctrl_usage(argv[0]);
       exit(1);
@@ -474,5 +491,8 @@ int main(int argc, char **argv)
   fnet_ctrl_close(client);
 
  end:
+  printf("hostname = %s\n", hostname);
+  printf("send_waveform_filename = %s\n", send_waveform_filename);
+  printf("do_send_waveform = %d\n", do_send_waveform);
   return 0;
 }
