@@ -117,7 +117,7 @@ entity fakernet_top is
 
     -- waveform
     waveform_data_in : in  std_logic_vector(31 downto 0); 
-    waveform_wr_en   : in  std_logic;
+    waveform_wr_en   : in  std_logic
 
     );
 
