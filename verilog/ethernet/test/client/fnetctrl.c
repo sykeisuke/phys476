@@ -145,8 +145,21 @@ int main(int argc, char **argv)
   lcl_func_mon_info._xadc._prev_max_ch = (uint32_t) -1;
 
   hostname = NULL;
+  int non_option_args = 0;
+
   for (i = 1; i < argc; i++)
     {
+      if (argv[i][0] != '-') {
+          if (hostname == NULL) {
+              hostname = argv[i];
+              continue; 
+          } else {
+              fprintf(stderr, "Unexpected extra argument: %s\n", argv[i]);
+              fnet_ctrl_usage(argv[0]);
+              exit(1);
+          }
+      }
+
       if (strcmp(argv[i],"--help") == 0)
 	{
 	  fnet_ctrl_usage(argv[0]);
@@ -216,10 +229,10 @@ int main(int argc, char **argv)
 	}
       else if (strcmp(argv[i],"--spi-read") == 0)
 	do_spi_read = 1;
-      else if (strncmp(argv[i],"--send-waveform=",17) == 0)
+      else if (strncmp(argv[i],"--send-waveform=",16) == 0)
         {
           do_send_waveform = 1;
-          send_waveform_filename = argv[i] + 17;
+          send_waveform_filename = argv[i] + 16;
         }
       else if (strncmp(argv[i],"--ntpq=",7) == 0)
 	{
@@ -334,31 +347,16 @@ int main(int argc, char **argv)
 	      exit(1);
 	    }
 	}
-      /* non-option: hostname (only once) */
-      else if (argv[i][0] != '-') {
-          fprintf(stderr, "Unknown option: %s\n", argv[i]);
-          fnet_ctrl_usage(argv[0]);
-          exit(1);
-      }
-      else if (hostname == NULL) {
-        hostname = argv[i];
-      }
-      /* unknown option */
-      else {
-        fprintf(stderr, "Unknown option: %s\n", argv[i]);
-        fnet_ctrl_usage(argv[0]);
-        exit(1);
+      else {  // ←ここ！！！
+        if (hostname == NULL) {
+            hostname = argv[i];
+        } else {
+            fprintf(stderr, "Unexpected extra argument: %s\n", argv[i]);
+            fnet_ctrl_usage(argv[0]);
+            exit(1);
+        }
       }
   }
-//      else
-//	{
-//	  hostname = argv[i];
-	  /*
-	    fprintf (stderr, "Unhandled argument '%s'.\n", argv[i]);
-	    exit(1);
-	  */
-//	}
-//    }
 
   if (hostname == NULL)
     {
@@ -491,8 +489,5 @@ int main(int argc, char **argv)
   fnet_ctrl_close(client);
 
  end:
-  printf("hostname = %s\n", hostname);
-  printf("send_waveform_filename = %s\n", send_waveform_filename);
-  printf("do_send_waveform = %d\n", do_send_waveform);
   return 0;
 }

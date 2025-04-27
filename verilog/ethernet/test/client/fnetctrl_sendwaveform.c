@@ -16,7 +16,6 @@ void fnet_send_waveform(struct fnet_ctrl_client *client, const char *filename) {
         perror("Failed to open waveform file");
         exit(1);
     }
-    printf("Opened waveform file successfully!\n");
 
     float buffer[100];  // One event = 100 float values
     int index = 0;

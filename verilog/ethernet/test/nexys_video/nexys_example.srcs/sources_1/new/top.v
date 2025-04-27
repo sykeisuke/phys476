@@ -215,7 +215,7 @@ wire phy_mdc_i;
     reg data_write;
     reg data_commit;
     wire data_free;
-    wire data_reset;
+    wire data_reset = 1'b0;
 
 //    data_gen_user data_gen_user_inst (
     
