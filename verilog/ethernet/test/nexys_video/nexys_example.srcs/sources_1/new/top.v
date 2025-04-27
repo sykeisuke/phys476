@@ -237,8 +237,8 @@ wire phy_mdio_out;
 assign phy_mdio = phy_mdio_out;
 
 // waveform data input signals
-wire [31:0] waveform_data_in;
-wire        waveform_wr_en;
+wire [31:0] waveform_data_out;
+wire        waveform_wr_out;
 
 // fakernet_top instantiation
 fakernet_top fakernet_top_inst (
@@ -293,8 +293,8 @@ fakernet_top fakernet_top_inst (
     .user_data_free       (data_free),
     .user_data_reset      (data_reset),
 
-    .waveform_data_in     (waveform_data_in), 
-    .waveform_wr_en       (waveform_wr_en)
+    .waveform_data_out     (waveform_data_out), 
+    .waveform_wr_out       (waveform_wr_out)
 );
 
 // FIFO and dummy HLS4ML IP connection
@@ -346,8 +346,8 @@ endgenerate
 fifo_generator_0 fifo_inst (
     .clk(clk_int),
     .srst(data_reset),
-    .din(waveform_data_in),
-    .wr_en(waveform_wr_en),
+    .din(waveform_data_out),
+    .wr_en(waveform_wr_out),
     .rd_en(fifo_rd_en),
     .dout(fifo_dout),
     .full(),
@@ -410,8 +410,8 @@ end
 
 ila_0 ila_inst (
   .clk(clk_int),
-  .probe0(waveform_wr_en),
-  .probe1(waveform_data_in),
+  .probe0(waveform_wr_out),
+  .probe1(waveform_data_out),
   .probe2(fifo_empty),
   .probe3(hls4ml_start),
   .probe4(hls4ml_done)

@@ -52,8 +52,8 @@ entity fnet_regaccess is
         regacc_int_cnt     : out std_logic_vector(3 downto 0) := (others=>'0');
 
         -- waveform FIFO interface (we drive these from internal signals)
-        waveform_data_in  : out std_logic_vector(31 downto 0);
-        waveform_wr_en : out std_logic;
+        waveform_data_out  : out std_logic_vector(31 downto 0);
+        waveform_wr_out : out std_logic;
 
         ram_stat_udp_regacc : in ram_stat_block;
         ram_stat_udp_regidp : in ram_stat_block;
@@ -496,8 +496,8 @@ begin
   end process;
 
   -- now drive the actual FIFO-interface ports from our registered signals:
-  waveform_data_in  <= int_wave_data;
-  waveform_wr_en <= int_wave_wr_en;
+  waveform_data_out  <= int_wave_data;
+  waveform_wr_out <= int_wave_wr_en;
 
   ram_cons_udp_regacc.clear_hasdata <= a.done;
   ram_prod_udp_regidp.set_hasdata <=

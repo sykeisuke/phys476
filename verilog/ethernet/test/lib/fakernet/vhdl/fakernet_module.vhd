@@ -92,6 +92,8 @@ entity fakernet_module is
         -- Waveform port
         waveform_data_in   : in std_logic_vector(31 downto 0);
         waveform_wr_en     : in std_logic;
+        waveform_data_out  : out std_logic_vector(31 downto 0);
+        waveform_wr_out    : out std_logic;
         -- Data input interface
         data_word      : in  std_logic_vector(31 downto 0);
         data_offset    : in  std_logic_vector;
@@ -190,10 +192,6 @@ architecture RTL of fakernet_module is
   signal reg_int_done    : std_logic;
   signal reg_int_cnt     : std_logic_vector(3 downto 0);
 
-  -- waveform
-  signal regacc_waveform_data_in : std_logic_vector(31 downto 0);
-  signal regacc_waveform_wr_en : std_logic;
-
   -- MDIO access via local register.
   signal mdio_a_req_data  : std_logic_vector(31 downto 0);
   signal mdio_a_request   : std_logic;
@@ -274,6 +272,9 @@ end Component;
   signal cc1   : std_logic_vector(49 downto 0) := (others => '0');
 
 begin
+  -- waveform
+  waveform_data_out <= waveform_data_in;
+  waveform_wr_out <= waveform_wr_en;
 
   ram_arp_icmp.prod2.set_again <= '0';
   ram_pkt_gen.prod2.set_again <= '0';
@@ -560,8 +561,8 @@ begin
       regacc_stat_aux => regacc_aux_info.stat,
 
       -- waveform
-      regacc_waveform_data_in <= waveform_data_in, 
-      regacc_waveform_wr_en <= waveform_wr_en,
+      waveform_data_out => waveform_data_in, 
+      waveform_wr_out => waveform_wr_en,
 
       --
       debug_state => debug_state_regacc

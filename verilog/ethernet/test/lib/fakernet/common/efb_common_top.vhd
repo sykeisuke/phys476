@@ -143,7 +143,9 @@ entity efb_common_top is
     user_data_reset      : out  std_logic;
     -- Waveform data
     waveform_data_in     : in  std_logic_vector(31 downto 0);
-    waveform_wr_en       : in  std_logic
+    waveform_wr_en       : in  std_logic;
+    waveform_data_out    : out  std_logic_vector(31 downto 0);
+    waveform_wr_out      : out  std_logic
     );
 
 end efb_common_top;
@@ -530,6 +532,10 @@ probe0 : in std_logic_vector(199 downto 0)
 end Component;
 
 begin
+
+  -- waveform
+  waveform_data_out <= waveform_data_in;
+  waveform_wr_out <= waveform_wr_en;
 
   -------------------------------
   -- Control resetting the PHY --
@@ -1053,8 +1059,8 @@ begin
       reg_done        => regacc_done,
       reg_cnt         => regacc_cnt,
       -- Waveform data
-      waveform_data_in   => waveform_data_in,
-      waveform_wr_en     => waveform_wr_en,
+      waveform_data_out  => waveform_data_in,
+      waveform_wr_out    => waveform_wr_en,
       -- Data input interface
       data_word       => data_word,
       data_offset     => data_offset,
