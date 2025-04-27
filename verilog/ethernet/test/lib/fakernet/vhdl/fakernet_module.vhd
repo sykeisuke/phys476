@@ -260,6 +260,9 @@ architecture RTL of fakernet_module is
   -- NTP system
   signal ntp_stat : ntp_state := ntp_state_zero;
 
+  -- waveform
+  signal regacc_waveform_data_in : std_logic_vector(31 downto 0);
+  signal regacc_waveform_wr_en : std_logic;
 
 Component ila_0 is 
 port (
@@ -273,8 +276,8 @@ end Component;
 
 begin
   -- waveform
-  waveform_data_out <= waveform_data_in;
-  waveform_wr_out <= waveform_wr_en;
+  waveform_data_out <= regacc_waveform_data_in;
+  waveform_wr_out <= regacc_waveform_wr_en;
 
   ram_arp_icmp.prod2.set_again <= '0';
   ram_pkt_gen.prod2.set_again <= '0';
@@ -561,8 +564,8 @@ begin
       regacc_stat_aux => regacc_aux_info.stat,
 
       -- waveform
-      waveform_data_out => waveform_data_in, 
-      waveform_wr_out => waveform_wr_en,
+      waveform_data_out => regacc_waveform_data_in,
+      waveform_wr_out => wregacc_waveform_wr_en,
 
       --
       debug_state => debug_state_regacc
