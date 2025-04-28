@@ -18,13 +18,17 @@ module hls4ml_wrapper (
     output wire [3199:0] hls4ml_input_data_flat,
     input  wire [127:0]  hls4ml_output_data_flat,
     output reg           hls4ml_start,
-    input  wire          hls4ml_done
+    input  wire          hls4ml_done,
+
+    // debug
+    output wire fifo_empty,
+    output wire fifo_full
 );
 
 // FIFO signals
 wire [31:0] fifo_dout;
 reg  fifo_rd_en;
-wire fifo_empty;
+//wire fifo_empty;
 
 // Internal buffers
 reg [31:0] hls4ml_input_data_array [0:99];
@@ -43,7 +47,7 @@ fifo_generator_0 fifo_inst (
     .wr_en(waveform_wr_en),
     .rd_en(fifo_rd_en),
     .dout(fifo_dout),
-    .full(),
+    .full(fifo_full),
     .empty(fifo_empty)
 );
 

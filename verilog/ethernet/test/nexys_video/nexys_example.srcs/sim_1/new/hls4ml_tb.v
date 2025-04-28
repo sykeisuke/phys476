@@ -11,6 +11,8 @@ wire [3199:0] hls4ml_input_data_flat;
 wire [127:0] hls4ml_output_data_flat;
 wire hls4ml_start;
 wire hls4ml_done;
+wire fifo_empty;
+wire fifo_full;
 
 // Clock generation
 initial begin
@@ -30,16 +32,18 @@ hls4ml_wrapper uut_wrapper (
     .clk(clk),
     .rst(rst),
     .waveform_data_in(waveform_data_in),
-    .waveform_wr(waveform_wr_en),
-    .data_word(data_word),
-    .data_offset(data_offset),
-    .data_write(data_write),
-    .data_commit(data_commit),
-    .data_free(1'b1),  // Assume always free in TB
+    .waveform_wr_en(waveform_wr_en),
+    .user_data_word(data_word),
+    .user_data_offset(data_offset),
+    .user_data_write(data_write),
+    .user_data_commit(data_commit),
+    .user_data_free(1'b1),  // Assume always free in TB
     .hls4ml_input_data_flat(hls4ml_input_data_flat),
     .hls4ml_output_data_flat(hls4ml_output_data_flat),
     .hls4ml_start(hls4ml_start),
-    .hls4ml_done(hls4ml_done)
+    .hls4ml_done(hls4ml_done),
+    .fifo_empty(fifo_empty),
+    .fifo_full(fifo_full)
 );
 
 // Instantiate dummy_hls4ml_ip
@@ -72,6 +76,9 @@ initial begin
     end
     @(posedge clk);
     waveform_wr_en <= 1'b0;
+
+    #1000;
+    $finish;
 end
 
 // Capturing output
