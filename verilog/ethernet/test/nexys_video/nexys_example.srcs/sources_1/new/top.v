@@ -17,7 +17,6 @@ module top
     
 );
 
-
 // Clock Management
 wire clk_ibufg;
 // Internal 125 MHz clock
@@ -40,7 +39,6 @@ wire clk90_int;
 wire clk_200_mmcm_out;
 wire clk_200_int;
 
-
 wire clk_25_mmcm_out;
 wire clk_25_int;
 wire clk_500_mmcm_out;
@@ -49,7 +47,6 @@ wire clk_500_90_mmcm_out;
 wire clk_500_90_int;
 wire clk_250_mmcm_out;
 wire clk_250_int;
-
 
 // MMCM instance
 // 100 MHz in, 125 MHz out
@@ -112,7 +109,6 @@ clk_mmcm_inst (
     .LOCKED(mmcm_locked)
 );
 
-
 BUFG
 clk_bufg_inst (
     .I(clk_mmcm_out),
@@ -155,19 +151,18 @@ clk_500_90_bufg_inst (
     .O(clk_500_90_int)
 );
 
-
-    wire        mac_gmii_rx_clk;
-    wire        mac_gmii_rx_rst;
-    wire [7:0]  mac_gmii_rxd;
-    wire        mac_gmii_rx_dv;
-    wire        mac_gmii_rx_er;
-    wire        mac_gmii_tx_clk;
-    wire        mac_gmii_tx_rst;
-    wire        mac_gmii_tx_clk_en;
-    wire [7:0]  mac_gmii_txd;
-    wire        mac_gmii_tx_en;
-    wire        mac_gmii_tx_er;
-
+// PHY-MAC Interface
+wire        mac_gmii_rx_clk;
+wire        mac_gmii_rx_rst;
+wire [7:0]  mac_gmii_rxd;
+wire        mac_gmii_rx_dv;
+wire        mac_gmii_rx_er;
+wire        mac_gmii_tx_clk;
+wire        mac_gmii_tx_rst;
+wire        mac_gmii_tx_clk_en;
+wire [7:0]  mac_gmii_txd;
+wire        mac_gmii_tx_en;
+wire        mac_gmii_tx_er;
 
 phy_mac phy_mac_inst (
     .clk (clk_int),
@@ -205,34 +200,14 @@ wire [3:0] led_g;
 wire [3:0] led_b;
 
 wire phy_mdc_i;
+assign phy_mdc = phy_mdc_i;
 
+wire phy_mdio_out;
+assign phy_mdio = phy_mdio_out;
 
-    wire [7:0] countdebug;
-    wire [19:0] statedebug;
-    reg [31:0] data_word;
-    reg [9:0] data_offset;
-    wire [10:0] data_commit_len;
-    reg data_write;
-    reg data_commit;
-    wire data_free;
-    wire data_reset;
-
-//    data_gen_user data_gen_user_inst (
-    
-//    .clk  (clk_int),
-//    .event_word       (data_word),
-//    .event_offset     (data_offset),
-//    .event_write      (data_write),
-//    .event_commit_len (data_commit_len),
-//    .event_commit     (data_commit),
-//    .event_free       (data_free),
-//    .event_reset      (data_reset)
-    
-//    );
-
-// force reset in the beginning
-reg [3:0] reset_counter;
-reg data_reset_reg;
+// Internal reset generator
+reg [3:0] reset_counter = 0;
+reg data_reset_reg = 1'b1;
 
 always @(posedge clk_int) begin
     if (reset_counter != 4'd15) begin
@@ -243,16 +218,29 @@ always @(posedge clk_int) begin
     end
 end
 
-assign data_reset = data_reset_reg;
-
-assign phy_mdc = phy_mdc_i;
-
-wire phy_mdio_out;
-assign phy_mdio = phy_mdio_out;
-
-// waveform data input signals
+// Data signals
+//wire [7:0] countdebug;
+//wire [19:0] statedebug;
 wire [31:0] waveform_data_out;
-wire        waveform_wr_out;
+wire waveform_wr_out;
+reg [31:0] data_word;
+reg [9:0] data_offset;
+reg data_write;
+reg data_commit;
+wire [10:0] data_commit_len;
+wire data_free;
+wire data_reset = data_reset_reg;
+
+//    data_gen_user data_gen_user_inst (
+//    .clk  (clk_int),
+//    .event_word       (data_word),
+//    .event_offset     (data_offset),
+//    .event_write      (data_write),
+//    .event_commit_len (data_commit_len),
+//    .event_commit     (data_commit),
+//    .event_free       (data_free),
+//    .event_reset      (data_reset)    
+//    );
 
 // fakernet_top instantiation
 fakernet_top fakernet_top_inst (
@@ -311,133 +299,51 @@ fakernet_top fakernet_top_inst (
     .waveform_wr_out       (waveform_wr_out)
 );
 
-// FIFO and dummy HLS4ML IP connection
-wire [31:0] fifo_dout;
-reg fifo_rd_en;
-wire fifo_empty;
-
-reg hls4ml_start;
+// HLS4ML Interface Signals
+wire [3199:0] hls4ml_input_data_flat;
+wire [127:0] hls4ml_output_data_flat;
+wire hls4ml_start;
 wire hls4ml_done;
-wire hls4ml_idle;
-wire hls4ml_ready;
 
-reg [31:0] hls4ml_input_data_array [0:99]; // intermediate array
-wire [3199:0] hls4ml_input_data_flat;      // flatten version (32*100)
-wire [127:0] hls4ml_output_data_flat;      // dummy output (32*4)
-
-reg [6:0] read_count;
-
-reg fifo_rd_en_d;
-
-always @(posedge clk_int) begin
-    fifo_rd_en <= 0;  
-
-    if (data_reset) begin
-        fifo_rd_en_d <= 0;
-        hls4ml_start <= 0;
-        read_count <= 0;
-    end else begin
-        if (!fifo_empty && read_count < 100) begin
-            fifo_rd_en <= 1;  
-        end
-
-        if (fifo_rd_en_d) begin  
-            hls4ml_input_data_array[read_count] <= fifo_dout;
-            read_count <= read_count + 1;
-        end
-
-        if (read_count == 100) begin
-            hls4ml_start <= 1;
-            read_count <= 0;
-        end else begin
-            hls4ml_start <= 0;
-        end
-
-        fifo_rd_en_d <= fifo_rd_en;
-    end
-end
-
-// Flatten input data array for HLS4ML IP
-genvar i;
-generate
-    for (i = 0; i < 100; i = i + 1) begin : flatten_input
-        assign hls4ml_input_data_flat[i*32 +: 32] = hls4ml_input_data_array[i];
-    end
-endgenerate
-
-// FIFO instance (write waveform data, read for hls4ml)
-fifo_generator_0 fifo_inst (
-    .clk(clk_int),
-    .srst(data_reset),
-    .din(waveform_data_out),
-    .wr_en(waveform_wr_out),
-    .rd_en(fifo_rd_en),
-    .dout(fifo_dout),
-    .full(),
-    .empty(fifo_empty)
+// hls4ml_wrapper instantiation
+hls4ml_wrapper hls4ml_wrapper_inst (
+    	.clk(clk_int), 
+	.rst(data_reset),
+    	.waveform_data_in(waveform_data_out), 
+	.waveform_wr_en(waveform_wr_out),
+    	.user_data_word(data_word), 
+	.user_data_offset(data_offset),
+    	.user_data_write(data_write), 
+	.user_data_commit(data_commit),
+    	.user_data_commit_len(data_commit_len), 
+	.user_data_free(data_free),
+    	.hls4ml_input_data_flat(hls4ml_input_data_flat), 
+	.hls4ml_output_data_flat(hls4ml_output_data_flat),
+    	.hls4ml_start(hls4ml_start), 
+	.hls4ml_done(hls4ml_done)
 );
 
-// HLS4ML dummy IP instance
-dummy_hls4ml_ip hls4ml_inst (
-    .ap_clk(clk_int),
-    .ap_rst_n(~data_reset),
-    .ap_start(hls4ml_start),
-    .ap_done(hls4ml_done),
-    .ap_idle(hls4ml_idle),
-    .ap_ready(hls4ml_ready),
-    .input_data_flat(hls4ml_input_data_flat),
-    .output_data_flat(hls4ml_output_data_flat)
+// Dummy hls4ml core
+dummy_hls4ml_ip dummy_hls4ml_ip_inst (
+    	.ap_clk(clk_int),
+    	.ap_rst_n(~data_reset),
+    	.ap_start(hls4ml_start),
+    	.ap_done(hls4ml_done),
+    	.ap_idle(),
+    	.ap_ready(),
+    	.input_data_flat(hls4ml_input_data_flat),
+    	.output_data_flat(hls4ml_output_data_flat)
 );
 
-// HLS4ML output return logic
-reg [1:0] send_count;
-reg sending_result;
-reg [31:0] hls4ml_output_data_array [0:3]; // 32bit × 4 outputs
-
-always @(posedge clk_int) begin
-    if (data_reset) begin
-        send_count <= 0;
-        sending_result <= 0;
-        data_write <= 0;
-        data_commit <= 0;
-    end else begin
-        if (hls4ml_done && !sending_result) begin
-            // Start sending after HLS4ML done
-            sending_result <= 1;
-            send_count <= 0;
-
-            hls4ml_output_data_array[0] <= hls4ml_output_data_flat[31:0];
-            hls4ml_output_data_array[1] <= hls4ml_output_data_flat[63:32];
-            hls4ml_output_data_array[2] <= hls4ml_output_data_flat[95:64];
-            hls4ml_output_data_array[3] <= hls4ml_output_data_flat[127:96];
-        end
-
-        if (sending_result) begin
-            if (send_count < 4) begin
-                data_word <= hls4ml_output_data_array[send_count];
-                data_offset <= send_count;
-                data_write <= 1;
-                data_commit <= 0;
-                send_count <= send_count + 1;
-            end else begin
-                data_write <= 0;
-                data_commit <= 1;
-                sending_result <= 0;
-            end
-        end else begin
-            data_write <= 0;
-            data_commit <= 0;
-        end
-    end
-end
-
+// Integrated Logic Analyzer (ILA)
 ila_0 ila_inst (
-  .clk(clk_int),
-  .probe0(waveform_wr_out),
-  .probe1(waveform_data_out),
-  .probe2(fifo_empty),
-  .probe3(hls4ml_start),
-  .probe4(hls4ml_done)
+    .clk(clk_int),
+    .probe0(waveform_wr_out),
+    .probe1(waveform_data_out),
+    .probe2(fifo_empty),
+    .probe3(hls4ml_start),
+    .probe4(hls4ml_done)
 );
 
 endmodule
+
