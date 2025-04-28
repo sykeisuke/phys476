@@ -223,10 +223,10 @@ end
 //wire [19:0] statedebug;
 wire [31:0] waveform_data_out;
 wire waveform_wr_out;
-reg [31:0] data_word;
-reg [9:0] data_offset;
-reg data_write;
-reg data_commit;
+wire [31:0] data_word;
+wire [9:0] data_offset;
+wire data_write;
+wire data_commit;
 wire [10:0] data_commit_len;
 wire data_free;
 wire data_reset = data_reset_reg;

@@ -30,7 +30,7 @@ hls4ml_wrapper uut_wrapper (
     .clk(clk),
     .rst(rst),
     .waveform_data_in(waveform_data_in),
-    .waveform_wr(waveform_wr),
+    .waveform_wr(waveform_wr_en),
     .data_word(data_word),
     .data_offset(data_offset),
     .data_write(data_write),
@@ -57,21 +57,21 @@ dummy_hls4ml_ip uut_hls4ml_ip (
 
 // Driving input waveform
 reg [31:0] waveform_data_in;
-reg waveform_wr;
+reg waveform_wr_en;
 
 initial begin
     waveform_data_in = 0;
-    waveform_wr = 0;
+    waveform_wr_en = 0;
     #30;
 
     // Send 100 samples
     repeat (100) begin
         @(posedge clk);
         waveform_data_in <= $random;
-        waveform_wr <= 1'b1;
+        waveform_wr_en <= 1'b1;
     end
     @(posedge clk);
-    waveform_wr <= 1'b0;
+    waveform_wr_en <= 1'b0;
 end
 
 // Capturing output
