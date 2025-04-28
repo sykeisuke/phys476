@@ -215,7 +215,7 @@ wire phy_mdc_i;
     reg data_write;
     reg data_commit;
     wire data_free;
-    wire data_reset = 1'b0;
+    wire data_reset;
 
 //    data_gen_user data_gen_user_inst (
     
@@ -230,6 +230,20 @@ wire phy_mdc_i;
     
 //    );
 
+// force reset in the beginning
+reg [3:0] reset_counter;
+reg data_reset_reg;
+
+always @(posedge clk_int) begin
+    if (reset_counter != 4'd15) begin
+        reset_counter <= reset_counter + 1;
+        data_reset_reg <= 1'b1;
+    end else begin
+        data_reset_reg <= 1'b0;
+    end
+end
+
+assign data_reset = data_reset_reg;
 
 assign phy_mdc = phy_mdc_i;
 
@@ -313,24 +327,33 @@ wire [127:0] hls4ml_output_data_flat;      // dummy output (32*4)
 
 reg [6:0] read_count;
 
+reg fifo_rd_en_d;
+
 always @(posedge clk_int) begin
+    fifo_rd_en <= 0;  
+
     if (data_reset) begin
-        fifo_rd_en <= 0;
+        fifo_rd_en_d <= 0;
         hls4ml_start <= 0;
         read_count <= 0;
-    end else if (!fifo_empty) begin
-        if (read_count < 100) begin
-            fifo_rd_en <= 1;
+    end else begin
+        if (!fifo_empty && read_count < 100) begin
+            fifo_rd_en <= 1;  
+        end
+
+        if (fifo_rd_en_d) begin  
             hls4ml_input_data_array[read_count] <= fifo_dout;
             read_count <= read_count + 1;
-        end else begin
-            fifo_rd_en <= 0;
+        end
+
+        if (read_count == 100) begin
             hls4ml_start <= 1;
             read_count <= 0;
+        end else begin
+            hls4ml_start <= 0;
         end
-    end else begin
-        fifo_rd_en <= 0;
-        hls4ml_start <= 0;
+
+        fifo_rd_en_d <= fifo_rd_en;
     end
 end
 
@@ -357,7 +380,7 @@ fifo_generator_0 fifo_inst (
 // HLS4ML dummy IP instance
 dummy_hls4ml_ip hls4ml_inst (
     .ap_clk(clk_int),
-    .ap_rst_n(1'b1),
+    .ap_rst_n(~data_reset),
     .ap_start(hls4ml_start),
     .ap_done(hls4ml_done),
     .ap_idle(hls4ml_idle),
