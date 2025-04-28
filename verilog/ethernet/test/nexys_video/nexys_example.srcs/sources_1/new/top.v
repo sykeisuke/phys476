@@ -293,7 +293,7 @@ fakernet_top fakernet_top_inst (
     .user_data_commit_len (data_commit_len),
     .user_data_commit     (data_commit),
     .user_data_free       (data_free),
-    .user_data_reset      (data_reset),
+    //.user_data_reset      (data_reset),
 
     .waveform_data_out     (waveform_data_out), 
     .waveform_wr_out       (waveform_wr_out)
@@ -304,6 +304,8 @@ wire [3199:0] hls4ml_input_data_flat;
 wire [127:0] hls4ml_output_data_flat;
 wire hls4ml_start;
 wire hls4ml_done;
+wire fifo_empty;
+wire fifo_full;
 
 // hls4ml_wrapper instantiation
 hls4ml_wrapper hls4ml_wrapper_inst (
@@ -320,7 +322,9 @@ hls4ml_wrapper hls4ml_wrapper_inst (
     	.hls4ml_input_data_flat(hls4ml_input_data_flat), 
 	.hls4ml_output_data_flat(hls4ml_output_data_flat),
     	.hls4ml_start(hls4ml_start), 
-	.hls4ml_done(hls4ml_done)
+	.hls4ml_done(hls4ml_done),
+        .fifo_empty(fifo_empty),
+        .fifo_full(fifo_full)
 );
 
 // Dummy hls4ml core
@@ -341,6 +345,7 @@ ila_0 ila_inst (
     .probe0(waveform_wr_out),
     .probe1(waveform_data_out),
     .probe2(fifo_empty),
+    .probe2(fifo_full),
     .probe3(hls4ml_start),
     .probe4(hls4ml_done)
 );
