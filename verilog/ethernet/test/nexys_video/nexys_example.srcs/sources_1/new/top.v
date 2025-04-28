@@ -348,7 +348,6 @@ ila_0 ila_inst (
     .probe3(fifo_full),
     .probe4(hls4ml_start),
     .probe5(hls4ml_done),
-    .probe5(hls4ml_done),
     .probe6(data_write),
     .probe7(data_commit),
     .probe8(data_word),
