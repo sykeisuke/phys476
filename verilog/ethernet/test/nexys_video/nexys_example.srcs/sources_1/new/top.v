@@ -345,9 +345,14 @@ ila_0 ila_inst (
     .probe0(waveform_wr_out),
     .probe1(waveform_data_out),
     .probe2(fifo_empty),
-    .probe2(fifo_full),
-    .probe3(hls4ml_start),
-    .probe4(hls4ml_done)
+    .probe3(fifo_full),
+    .probe4(hls4ml_start),
+    .probe5(hls4ml_done),
+    .probe5(hls4ml_done),
+    .probe6(data_write),
+    .probe7(data_commit),
+    .probe8(data_word),
+    .probe9(data_offset)
 );
 
 endmodule
