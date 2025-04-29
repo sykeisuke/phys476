@@ -495,6 +495,7 @@ begin
       if (regacc_pre_addr(15 downto 0) >= x"1000" and regacc_pre_addr(15 downto 0) <= x"1063") then
         regacc_waveform_wr_en <= '1';
         regacc_waveform_data_in <= regacc_pre_data_wr;
+        regacc_pst2_done <= '1';
       else
         regacc_waveform_wr_en <= '0';
       end if;
