@@ -90,6 +90,7 @@ reg [1:0] send_count = 2'd0; // 0-3 result word index
 reg sending_result;
 reg waiting_free;
 reg commit_pending;
+reg [10:0] commit_len_reg;
 
 always @(posedge clk) begin
     user_data_write      <= 1'b0;
@@ -99,8 +100,9 @@ always @(posedge clk) begin
     if (rst) begin
         sending_result <= 1'b0;
         waiting_free   <= 1'b0;
-        send_count     <= 0;
+        send_count     <= 1'b0;
         commit_pending <= 1'b0;
+        commit_len_reg <= 1'b0;
     end else begin
         if (hls4ml_done && !sending_result) begin
             hls4ml_output_data_array[0] <= hls4ml_output_data_flat[31:0];
@@ -110,19 +112,11 @@ always @(posedge clk) begin
             sending_result <= 1'b1;
             waiting_free   <= 1'b0;
             send_count     <= 0;
-            commit_pending <= 1'b0;
         end
 
         if (sending_result) begin
-            /* all words sent → issue commit */
-            if (commit_pending) begin
-                user_data_commit     <= 1'b1;
-                user_data_commit_len <= OUT_WORDS;
-                sending_result       <= 1'b0;
-                commit_pending       <= 1'b0;
-            end
             /* wait until at least one free slot is signalled */
-            else if (!waiting_free) begin
+            if (!waiting_free) begin
                 if (user_data_free)
                     waiting_free <= 1'b1;
             end
@@ -133,12 +127,22 @@ always @(posedge clk) begin
                     user_data_offset <= {8'd0, send_count};
                     user_data_write  <= 1'b1;
                     send_count       <= send_count + 1;
-                    waiting_free     <= 1'b0;
-                    if (send_count == OUT_WORDS - 1) begin
-                        commit_pending <= 1'b1;
+                    waiting_free     <= 1'b0; // wait for next free
+                end 
+                else begin
+                    commit_pending <= 1'b1;
+                    commit_len_reg <= OUT_WORDS;
+                    sending_result <= 1'b0;
                     end
                 end
             end
+        end
+
+        /* all words sent → issue commit */
+        if (commit_pending) begin
+            user_data_commit     <= 1'b1;
+            user_data_commit_len <= commit_len_reg;
+            commit_pending       <= 1'b0;
         end
     end
 end
