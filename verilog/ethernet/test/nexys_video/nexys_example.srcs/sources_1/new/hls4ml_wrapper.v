@@ -41,20 +41,11 @@ fifo_generator_0 fifo_inst (
     .empty(fifo_empty)
 );
 
-// Internal buffers
-reg [31:0] hls4ml_input_data_array [0:99];
-reg [6:0] read_count;
-reg fifo_rd_en_d;
-
-reg [31:0] hls4ml_output_data_array [0:3];
-reg [1:0] send_count = 2'd0; // 0-3 result word index
-reg sending_result;
-reg waiting_free;
-
-localparam OUT_WORDS = 4; // (128 bit /32)
-
 // Flatten input array for hls4ml
+reg [31:0] hls4ml_input_data_array [0:99];
+
 genvar i;
+
 generate
     for (i = 0; i < 100; i = i + 1) begin : flatten_input
         assign hls4ml_input_data_flat[i*32 +: 32] = hls4ml_input_data_array[i];
@@ -62,6 +53,9 @@ generate
 endgenerate
 
 // FIFO reading and hls4ml start
+reg [6:0] read_count;
+reg fifo_rd_en_d;
+
 always @(posedge clk) begin
     fifo_rd_en <= 1'b0;
     hls4ml_start <= 1'b0;
@@ -89,6 +83,14 @@ always @(posedge clk) begin
 end
 
 // hls4ml output and sending out data
+localparam OUT_WORDS = 4; // (128 bit /32)
+
+reg [31:0] hls4ml_output_data_array [0:3];
+reg [1:0] send_count = 2'd0; // 0-3 result word index
+reg sending_result;
+reg waiting_free;
+reg commit_pending;
+
 always @(posedge clk) begin
     user_data_write      <= 1'b0;
     user_data_commit     <= 1'b0;
@@ -98,6 +100,7 @@ always @(posedge clk) begin
         sending_result <= 1'b0;
         waiting_free   <= 1'b0;
         send_count     <= 0;
+        commit_pending <= 1'b0;
     end else begin
         if (hls4ml_done && !sending_result) begin
             hls4ml_output_data_array[0] <= hls4ml_output_data_flat[31:0];
@@ -107,15 +110,23 @@ always @(posedge clk) begin
             sending_result <= 1'b1;
             waiting_free   <= 1'b0;
             send_count     <= 0;
+            commit_pending <= 1'b0;
         end
 
         if (sending_result) begin
-            /* 2-1) wait until at least one free slot is signalled */
-            if (!waiting_free) begin
+            /* all words sent → issue commit */
+            if (commit_pending) begin
+                user_data_commit     <= 1'b1;
+                user_data_commit_len <= OUT_WORDS;
+                sending_result       <= 1'b0;
+                commit_pending       <= 1'b0;
+            end
+            /* wait until at least one free slot is signalled */
+            else if (!waiting_free) begin
                 if (user_data_free)
                     waiting_free <= 1'b1;
             end
-            /* 2-2) transmit the four words sequentially           */
+            /* transmit the four words sequentially */
             else begin
                 if (send_count < OUT_WORDS) begin
                     user_data_word   <= hls4ml_output_data_array[send_count];
@@ -123,12 +134,9 @@ always @(posedge clk) begin
                     user_data_write  <= 1'b1;
                     send_count       <= send_count + 1;
                     waiting_free     <= 1'b0;
-                end
-                /* 2-3) all words sent → issue commit */
-                else begin
-                    user_data_commit     <= 1'b1;
-                    user_data_commit_len <= OUT_WORDS;
-                    sending_result       <= 1'b0;
+                    if (send_count == OUT_WORDS - 1) begin
+                        commit_pending <= 1'b1;
+                    end
                 end
             end
         end
