@@ -11,7 +11,7 @@ module hls4ml_wrapper (
     output reg  [9:0]  user_data_offset,
     output reg         user_data_write,
     output reg         user_data_commit,
-    input  wire [10:0] user_data_commit_len, 
+    output  reg [10:0]  user_data_commit_len, 
     input  wire        user_data_free,        
 
     // Connection to hls4ml IP
@@ -66,6 +66,7 @@ always @(posedge clk) begin
     fifo_rd_en <= 1'b0;
     user_data_write <= 1'b0;
     user_data_commit <= 1'b0;
+    user_data_commit_len <= 11'd0;
 
     if (rst) begin
         fifo_rd_en_d <= 1'b0;
