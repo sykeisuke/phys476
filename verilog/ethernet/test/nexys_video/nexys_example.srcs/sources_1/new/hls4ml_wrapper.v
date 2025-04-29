@@ -37,6 +37,7 @@ reg fifo_rd_en_d;
 reg [31:0] hls4ml_output_data_array [0:3];
 reg [1:0] send_count;
 reg sending_result;
+reg [1:0]  send_cnt = 2'd0;  // 0-3 result word index
 reg waiting_free;
 localparam TOTAL_WORDS = 4; // (128 bit /32)
 
