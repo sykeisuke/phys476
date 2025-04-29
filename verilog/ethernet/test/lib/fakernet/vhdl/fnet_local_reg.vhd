@@ -73,8 +73,8 @@ entity fnet_local_reg is
         tc_lcl_datagen_len_mask : out std_logic_vector(15 downto 0) := (others=>'0');
         tc_lcl_datagen_mark     : out std_logic_vector( 3 downto 0) := (others=>'0');
         --
-        waveform_data_wr : out std_logic_vector(31 downto 0);
-        waveform_wr      : out std_logic
+        reg_waveform_data_wr : out std_logic_vector(31 downto 0);
+        reg_waveform_wr      : out std_logic
         );
 end fnet_local_reg;
 

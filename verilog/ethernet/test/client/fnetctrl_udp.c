@@ -332,7 +332,7 @@ void send_waveform_bin(struct fnet_ctrl_client *client, const char *filename)
     int num_send;
     int ret;
 
-    const uint32_t base_addr = 0x100;  // dummy address (user_data_*)
+    const uint32_t base_addr = 0x00001000; /* 0x1000 */
     uint32_t offset = 0;
     uint32_t word;
     int count = 0;

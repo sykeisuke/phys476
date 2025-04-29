@@ -18,25 +18,16 @@ void fnet_send_waveform(struct fnet_ctrl_client *client, const char *filename) {
     }
 
     float buffer[100];  // One event = 100 float values
-    int index = 0;
+    //int index = 0;
 
     // Read and send each event
     while (fread(buffer, sizeof(float), 100, fp) == 100) {
-//        for (int i = 0; i < 100; i += 10) {
-//            for (int j = 0; j < 10; j++) {
-//                uint32_t value;
-//                memcpy(&value, &buffer[i+j], sizeof(uint32_t));
-//                fnet_ctrl_write_register(client, 0x1000 + (i+j), value);
-//            }
-            // usleep(1000); 
-//        }
         for (int i = 0; i < 100; i++) {
             uint32_t value;
             memcpy(&value, &buffer[i], sizeof(uint32_t));
             fnet_ctrl_write_register(client, 0x1000 + i, value); 
         }
-
-        fnet_ctrl_write_register(client, 0x1FFF, index++);
+        //fnet_ctrl_write_register(client, 0x1FFF, index++);
     }
 
     fclose(fp);
