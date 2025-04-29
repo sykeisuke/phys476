@@ -86,13 +86,14 @@ wire [31:0] data_word;
 wire [9:0] data_offset;
 wire data_write;
 wire data_commit;
+wire [10:0] data_commit_len;
 
 always @(posedge clk) begin
     if (data_write) begin
         $display("Data write: offset=%d, word=%h", data_offset, data_word);
     end
     if (data_commit) begin
-        $display("Data commit triggered.");
+        $display("Data commit triggered. commit_len = %0d", data_commit_len);
     end
 end
 

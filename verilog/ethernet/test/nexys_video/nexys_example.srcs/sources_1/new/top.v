@@ -350,8 +350,9 @@ ila_0 ila_inst (
     .probe5(hls4ml_done),
     .probe6(data_write),
     .probe7(data_commit),
-    .probe8(data_word),
-    .probe9(data_offset)
+    .probe8(data_commit_len),
+    .probe9(data_word),
+    .probe10(data_offset)
 );
 
 endmodule
