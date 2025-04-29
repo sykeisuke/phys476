@@ -11,8 +11,20 @@ module dummy_hls4ml_ip (
     output reg [127:0] output_data_flat   // 4 x 32bit = 128bit
 );
 
+reg ap_start_latched; 
 reg processing;
 reg [3:0] processing_counter;
+
+always @(posedge ap_clk or negedge ap_rst_n) begin
+    if (!ap_rst_n) begin
+        ap_start_latched <= 0;
+    end else begin
+        if (ap_start)
+            ap_start_latched <= 1;
+        else if (processing)
+            ap_start_latched <= 0; 
+    end
+end
 
 // State machine
 always @(posedge ap_clk or negedge ap_rst_n) begin
@@ -24,7 +36,7 @@ always @(posedge ap_clk or negedge ap_rst_n) begin
         processing_counter <= 0;
         output_data_flat <= 0;
     end else begin
-        if (ap_start && !processing) begin
+        if (ap_start_latched && !processing) begin
             ap_idle <= 0;
             ap_ready <= 0;
             processing <= 1;
