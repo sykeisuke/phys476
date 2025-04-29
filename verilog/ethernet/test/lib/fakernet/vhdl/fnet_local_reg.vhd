@@ -71,7 +71,10 @@ entity fnet_local_reg is
         tc_do_lcl_datagen       : out std_logic := '0';
         tc_lcl_datagen_chance   : out std_logic_vector(31 downto 0) := (others=>'0');
         tc_lcl_datagen_len_mask : out std_logic_vector(15 downto 0) := (others=>'0');
-        tc_lcl_datagen_mark     : out std_logic_vector( 3 downto 0) := (others=>'0')
+        tc_lcl_datagen_mark     : out std_logic_vector( 3 downto 0) := (others=>'0');
+        --
+        waveform_data_wr : out std_logic_vector(31 downto 0);
+        waveform_wr      : out std_logic
         );
 end fnet_local_reg;
 
@@ -127,6 +130,10 @@ architecture RTL of fnet_local_reg is
   signal reg_read_prev2 : std_logic := '0';
 
   signal access_done : std_logic := '0';
+
+  -- waveform data
+  signal waveform_data_wr : std_logic_vector(31 downto 0) := (others => '0');
+  signal waveform_wr      : std_logic := '0';
 
 begin
 
@@ -184,6 +191,15 @@ begin
           testctrl_pulse(conv_integer(reg_addr(2 downto 0))) <= '1';
           access_done <= '1';
         end if;
+      end if;
+
+      -- waveform registers
+      if (reg_write = '1' and
+          reg_addr(11 downto 0) >= x"1000" and
+          reg_addr(11 downto 0) <= x"1063") then
+        waveform_data_wr <= reg_data_wr;
+        waveform_wr <= '1';
+        access_done <= '1';
       end if;
 
       -- Debug counter readout
