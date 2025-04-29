@@ -37,6 +37,7 @@ hls4ml_wrapper uut_wrapper (
     .user_data_offset(data_offset),
     .user_data_write(data_write),
     .user_data_commit(data_commit),
+    .user_data_commit_len(data_commit_len),
     .user_data_free(1'b1),  // Assume always free in TB
     .hls4ml_input_data_flat(hls4ml_input_data_flat),
     .hls4ml_output_data_flat(hls4ml_output_data_flat),

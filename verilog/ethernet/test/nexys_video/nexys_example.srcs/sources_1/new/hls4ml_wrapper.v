@@ -94,6 +94,7 @@ reg commit_pending;
 always @(posedge clk) begin
     user_data_write      <= 1'b0;
     user_data_commit     <= 1'b0;
+    user_data_commit_len <= 11'b0;
 
     if (rst) begin
         sending_result <= 1'b0;
@@ -116,6 +117,7 @@ always @(posedge clk) begin
             // all words sent → issue commit
             if (commit_pending) begin
                 user_data_commit     <= 1'b1;
+                user_data_commit_len <= OUT_WORDS;
                 sending_result       <= 1'b0;
                 commit_pending       <= 1'b0;
             // wait until at least one free slot is signalled 
@@ -133,7 +135,6 @@ always @(posedge clk) begin
 
                     if (send_count == OUT_WORDS - 1) begin
                         commit_pending <= 1'b1;
-                        user_data_commit_len <= OUT_WORDS;
                     end
                 end
             end
