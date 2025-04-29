@@ -11,8 +11,8 @@ module hls4ml_wrapper (
     output reg  [9:0]  user_data_offset,
     output reg         user_data_write,
     output reg         user_data_commit,
-    input  wire [10:0] user_data_commit_len, // (can be unused)
-    input  wire        user_data_free,        // (can be unused)
+    input  wire [10:0] user_data_commit_len, 
+    input  wire        user_data_free,        
 
     // Connection to hls4ml IP
     output wire [3199:0] hls4ml_input_data_flat,
@@ -28,7 +28,6 @@ module hls4ml_wrapper (
 // FIFO signals
 wire [31:0] fifo_dout;
 reg  fifo_rd_en;
-//wire fifo_empty;
 
 // Internal buffers
 reg [31:0] hls4ml_input_data_array [0:99];
@@ -38,6 +37,8 @@ reg fifo_rd_en_d;
 reg [31:0] hls4ml_output_data_array [0:3];
 reg [1:0] send_count;
 reg sending_result;
+reg waiting_free;
+localparam TOTAL_WORDS = 4; // (128 bit /32)
 
 // FIFO instance (internal)
 fifo_generator_0 fifo_inst (
@@ -52,10 +53,6 @@ fifo_generator_0 fifo_inst (
 );
 
 // Flatten input array for hls4ml
-
-// Unroll
-// Note: Generate block must be outside always block
-
 genvar i;
 generate
     for (i = 0; i < 100; i = i + 1) begin : flatten_input
@@ -66,6 +63,8 @@ endgenerate
 // Control Logic
 always @(posedge clk) begin
     fifo_rd_en <= 1'b0;
+    user_data_write <= 1'b0;
+    user_data_commit <= 1'b0;
 
     if (rst) begin
         fifo_rd_en_d <= 1'b0;
@@ -73,12 +72,11 @@ always @(posedge clk) begin
         read_count <= 0;
         sending_result <= 1'b0;
         send_count <= 0;
-        user_data_write <= 1'b0;
-        user_data_commit <= 1'b0;
+        waiting_free <= 1'b0;
     end else begin
 
         // --- FIFO Read and hls4ml Input Fill ---
-        if (!fifo_empty && read_count < 100) begin
+        if (!fifo_empty && read_count < 7'd100) begin
             fifo_rd_en <= 1'b1;
         end
 
@@ -87,7 +85,7 @@ always @(posedge clk) begin
             read_count <= read_count + 1;
         end
 
-        if (read_count == 100) begin
+        if (read_count == 7'd100) begin
             hls4ml_start <= 1'b1;
             read_count <= 0;
         end else begin
@@ -98,30 +96,37 @@ always @(posedge clk) begin
 
         // --- hls4ml Output Return ---
         if (hls4ml_done && !sending_result) begin
-            sending_result <= 1'b1;
-            send_count <= 0;
-
             hls4ml_output_data_array[0] <= hls4ml_output_data_flat[31:0];
             hls4ml_output_data_array[1] <= hls4ml_output_data_flat[63:32];
             hls4ml_output_data_array[2] <= hls4ml_output_data_flat[95:64];
             hls4ml_output_data_array[3] <= hls4ml_output_data_flat[127:96];
+            sending_result <= 1'b1;
+            waiting_free <= 0; // wait for first free
+            send_count <= 0;
         end
 
         if (sending_result) begin
-            if (send_count < 4) begin
-                user_data_word <= hls4ml_output_data_array[send_count];
-                user_data_offset <= send_count;
-                user_data_write <= 1'b1;
-                user_data_commit <= 1'b0;
-                send_count <= send_count + 1;
-            end else begin
-                user_data_write <= 1'b0;
-                user_data_commit <= 1'b1;
-                sending_result <= 1'b0;
+            /* 2-1) wait until at least one free slot is signalled */
+            if (!waiting_free) begin
+                if (user_data_free)
+                    waiting_free <= 1'b1;
             end
-        end else begin
-            user_data_write <= 1'b0;
-            user_data_commit <= 1'b0;
+            /* 2-2) transmit the four words sequentially           */
+            else begin
+                if (send_cnt < OUT_WORDS) begin
+                    user_data_word   <= hls4ml_output_data_array[send_cnt];
+                    user_data_offset <= {8'd0, send_cnt};
+                    user_data_write  <= 1'b1;        // one-clock strobe
+                    send_cnt         <= send_cnt + 1'b1;
+                    waiting_free     <= 1'b0;        // check free again
+                end
+                /* 2-3) all words sent → issue commit */
+                else begin
+                    user_data_commit_len <= OUT_WORDS;  // word count
+                    user_data_commit     <= 1'b1;       // one-clock strobe
+                    sending_result       <= 1'b0;       // back to idle
+                end
+            end
         end
     end
 end
