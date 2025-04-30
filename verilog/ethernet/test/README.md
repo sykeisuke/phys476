@@ -5,7 +5,7 @@
 This repository provides an implementation of **Fakernet** on the **Nexys Video** FPGA board (Artix-7), using the **Realtek RTL8211E-VL** PHY for 1 Gbps Ethernet communication.
 
 For general information about Fakernet, please visit:  
-👉 https://fy.chalmers.se/~f96hajo/fakernet/
+https://fy.chalmers.se/~f96hajo/fakernet/
 
 The control software (`fnetctrl`) is under the `client/` directory, but it can also be downloaded from the website above.
 
