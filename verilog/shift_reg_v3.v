@@ -6,12 +6,12 @@ module SR4RE (
   output reg [3:0] Q 
 );
 
-  reg [26:0] div_counter = 0;
+  reg [27:0] div_counter = 0;
   reg tick = 0;           
   
   always @(posedge CLK) begin
     div_counter <= div_counter + 1;
-    tick <= (div_counter[24] == 1'b1) && (div_counter[23:0] == 24'h0);
+    tick <= (div_counter[27] == 1'b1) && (div_counter[26:0] == 27'h0);
 
     if (R) begin
       Q <= 4'b0000; 

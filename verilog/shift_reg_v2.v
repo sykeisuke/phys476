@@ -6,13 +6,13 @@ module SR4RE (
   output reg [3:0] Q 
 );
 
-  reg [26:0] div_counter = 0;
+  reg [27:0] div_counter = 0;
   reg slow_clk = 0;           
   
-  // Clock divider: Generates a slow clock from the 100MHz input clock
+  // Slow CLK
   always @(posedge CLK) begin
     div_counter <= div_counter + 1;
-    slow_clk <= div_counter[24];
+    slow_clk <= div_counter[27];
   end
 
   always @(posedge slow_clk) begin
