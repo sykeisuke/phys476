@@ -12,8 +12,12 @@ module pipeline (
 
     always @(posedge clk) begin
         if (rst) begin
-            s1 <= 0, s2 <= 0, s3 <=0;
-            v1 <= 0, v2 <= 0, v3 <=0;
+            s1 <= 0; 
+            s2 <= 0; 
+            s3 <= 0;
+            v1 <= 0; 
+            v2 <= 0; 
+            v3 <= 0;
             Y <= 0;
             out_valid <= 0;
         end
