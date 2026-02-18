@@ -19,19 +19,17 @@ module fifo_sync (
 
     assign full = (count == FIFO_DEPTH)? 1 : 0;            
     assign empty = (count == 0)? 1 : 0;            
-    integer i;
+
+    wire wr_fire = wr_en && !full;
+    wire rd_fire = rd_en && !empty;
 
     // write process
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             wr_ptr <= 0;
-	    // data reset
-            for (i = 0; i < FIFO_DEPTH; i = i + 1) begin
-               fifo_mem[i] <= 8'b0;
-            end
-        end else if (wr_en && !full) begin
+        end else if (wr_fire) begin
             fifo_mem[wr_ptr] <= data_in;
-            wr_ptr <= (wr_ptr +1) % FIFO_DEPTH;
+            wr_ptr <= (wr_ptr == DEPTH-1) ? 0 : (wr_ptr + 1);
         end
     end
 
@@ -39,9 +37,10 @@ module fifo_sync (
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             rd_ptr <= 0;
-        end else if (rd_en && !empty) begin
+            data_out <= 0;
+        end else if (rd_fire) begin
             data_out <= fifo_mem[rd_ptr]; 
-            rd_ptr <= (rd_ptr +1) % FIFO_DEPTH;
+            rd_ptr <= (rd_ptr == DEPTH-1) ? 0 : (rd_ptr + 1);
         end
     end
 
@@ -50,7 +49,7 @@ module fifo_sync (
         if (reset) begin
             count <= 0;
         end else begin
-	    case ({wr_en, rd_en})
+	    case ({wr_fire, rd_fire})
 		2'b10: count <= count + 1;
 		2'b01: count <= count - 1;
 		default: count <= count;
