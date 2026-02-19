@@ -1,4 +1,3 @@
-// tb_axis_fifo_simple.v
 `timescale 1ns/1ps
 
 module fifo_tb;
