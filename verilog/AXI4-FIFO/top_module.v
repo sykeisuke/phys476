@@ -1,4 +1,4 @@
-module top_moduleo (
+module top_module (
     input  wire        aclk,
     input  wire        aresetn,
 
@@ -10,7 +10,7 @@ module top_moduleo (
     // AXI-Stream output (FIFO -> Sink)
     output wire [7:0]  m_axis_tdata,
     output wire        m_axis_tvalid,
-    input  wire        m_axis_tready,
+    input  wire        m_axis_tready
 );
 
   axis_data_fifo_0 u_fifo (
