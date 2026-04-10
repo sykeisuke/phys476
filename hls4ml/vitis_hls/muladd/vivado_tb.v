@@ -13,12 +13,12 @@ module muladd_tb;
   wire ap_ready;
 
   wire [3:0] a_address0;
-  wire a_ce0;
-  reg [31:0] a_q0;
+  wire       a_ce0;
+  reg  [31:0] a_q0;
 
   wire [3:0] b_address0;
-  wire b_ce0;
-  reg [31:0] b_q0;
+  wire       b_ce0;
+  reg  [31:0] b_q0;
 
   wire [31:0] ap_return;
 
@@ -26,9 +26,9 @@ module muladd_tb;
   reg [31:0] b_mem [0:SIZE-1];
 
   reg [31:0] expected;
-  reg [31:0] result;
   integer i;
 
+  // 100 MHz clock
   always #5 clk = ~clk;
 
   muladd_0 uut (
@@ -48,42 +48,53 @@ module muladd_tb;
   );
 
   initial begin
-    clk = 0;
-    rst = 1;
+    clk      = 0;
+    rst      = 1;
     ap_start = 0;
+    a_q0     = 0;
+    b_q0     = 0;
     expected = 0;
 
-    #20 rst = 0;
-    #20;
-
+    // initialize input memories and expected result
     for (i = 0; i < SIZE; i = i + 1) begin
       a_mem[i] = i;
       b_mem[i] = i + 1;
       expected = expected + a_mem[i] * b_mem[i];
     end
 
+    // reset
+    #20;
+    rst = 0;
+
+    // one-cycle start pulse
+    @(posedge clk);
     ap_start = 1;
-    #500 ap_start = 0;
+    @(posedge clk);
+    ap_start = 0;
   end
 
-  always @ (posedge clk) begin
-    if (a_ce0) a_q0 <= a_mem[a_address0];
-    if (b_ce0) b_q0 <= b_mem[b_address0];
+  // simple memory model
+  always @(posedge clk) begin
+    if (a_ce0)
+      a_q0 <= a_mem[a_address0];
+    if (b_ce0)
+      b_q0 <= b_mem[b_address0];
   end
 
-  always @ (posedge clk) begin
+  // check result
+  always @(posedge clk) begin
     if (ap_done) begin
-      result <= ap_return;
-      #10;
-      $display("Result    : %h", result);
-      $display("Expected  : %h", expected);
-      if (result == expected)
+      $display("Result   = %0d (0x%08h)", ap_return, ap_return);
+      $display("Expected = %0d (0x%08h)", expected, expected);
+
+      if (ap_return == expected)
         $display("PASS");
       else
         $display("FAIL");
-      $stop;
+
+      #10;
+      $finish;
     end
   end
 
 endmodule
-
