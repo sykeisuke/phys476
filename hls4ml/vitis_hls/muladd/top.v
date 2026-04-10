@@ -1,30 +1,23 @@
 module top (
-    input wire clk,
-    input wire rst,
-    input wire [31:0] a [0:15],
-    input wire [31:0] b [0:15],
+    input  wire        clk,
+    input  wire        rst,
+    input  wire        ap_start,
+    output wire        ap_done,
+    output wire        ap_idle,
+    output wire        ap_ready,
+
+    output wire [3:0]  a_address0,
+    output wire        a_ce0,
+    input  wire [31:0] a_q0,
+
+    output wire [3:0]  b_address0,
+    output wire        b_ce0,
+    input  wire [31:0] b_q0,
+
     output wire [31:0] result
 );
 
-    wire ap_start = 1'b1;
-    wire ap_done;
-    wire ap_idle;
-    wire ap_ready;
-
-    wire [3:0] a_address0;
-    wire a_ce0;
-    reg  [31:0] a_q0;
-
-    wire [3:0] b_address0;
-    wire b_ce0;
-    reg  [31:0] b_q0;
-
-    always @(*) begin
-        a_q0 = a[a_address0];
-        b_q0 = b[b_address0];
-    end
-
-    muladd u_muladd (
+    muladd_0 u_muladd (
         .ap_clk(clk),
         .ap_rst(rst),
         .ap_start(ap_start),
