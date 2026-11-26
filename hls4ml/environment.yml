@@ -2,7 +2,7 @@ name: hls4ml
 channels:
   - conda-forge
 dependencies:
-  - python=3.10.10
+  - python=3.10.16
   - jupyter-book
   - jsonschema-with-format-nongpl
   - pydot
@@ -14,7 +14,11 @@ dependencies:
   - widgetsnbextension
   - pip==23.0.1
   - pip:
-      - hls4ml[profiling]==0.8.0
+      - hls4ml[profiling,optimization,sr,HGQ]==1.1.0
       - qkeras==0.9.0
-      - conifer==0.2b0
+      - conifer==1.5
       - pysr==0.16.3
+# after creating an hls4ml environment, 
+# install tensorflow-macos
+# pip install tensorflow-macos==2.11.0
+

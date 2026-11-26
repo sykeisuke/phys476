@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+# simulation and build outputs
+*.vcd
+a.out
+sim.out
+*.jou
+*.log
+.Xil/

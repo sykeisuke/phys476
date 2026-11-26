@@ -1,15 +1,32 @@
-# Code & File Repository for PHYS476
+# PHYS476 / PHYS399: FPGAs for Physicists (Spring 2027)
 
-This repository contains Verilog code and **hls4ml-related files** used in the **PHYS476 class**. It provides resources and examples for both **digital circuit design** and **machine learning on FPGAs**.
+Code and data for the course. The slides and lab handouts are handed out separately;
+this repository holds only what you run.
 
-## How to Clone the Repository
+## Get the code
 
-Follow these steps to clone the repository:
+```bash
+cd ~
+git clone https://github.com/sykeisuke/phys476 phys476
+mkdir -p ~/phys476_work
+```
 
-1. Open a terminal on your computer.
-2. Navigate to the directory where you want to clone the project.
-3. Run the following command:
+Copy a chapter's folder into `~/phys476_work` before you change anything, so that
+`git pull` never clashes with your edits.
 
-   ```bash
-   git clone https://github.com/sykeisuke/phys476.git
+## What is where
 
+| Folder | Contents | Chapters |
+|---|---|---|
+| `book/code/chNN/` | Verilog, testbenches, XDC, Tcl, Python and HLS C for chapter NN | 0–28 |
+| `hls4ml/` | Python environment (`environment.yml`), toy data (`toymc_*.npy`), hls4ml notebooks | 23–27 |
+| `final_project/` | Datasets and notebooks for the final-project examples (waveforms, tracks) | 28 |
+| `archive/2026/` | 2026 course code, kept for reference; not used in 2027 | — |
+
+## Tool versions
+
+- Vivado / Vitis HLS **2024.1** (matches the PYNQ-Z2 v3.1 and RFSoC 4x2 v3.1.1 images)
+- Icarus Verilog for simulation (`iverilog -g2005 -Wall`)
+- Python environment: `conda env create -f hls4ml/environment.yml` (Keras 2 / TensorFlow 2.11, hls4ml 1.1.0)
+
+The 2026 version of this repository is the tag `spring2026`.
