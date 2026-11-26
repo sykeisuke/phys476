@@ -1,4 +1,4 @@
-# PHYS476 / PHYS399: FPGAs for Physicists (Spring 2027)
+# PHYS476: FPGAs for Physicists (Spring 2027)
 
 Code and data for the course. The slides and lab handouts are handed out separately;
 this repository holds only what you run.
