@@ -23,6 +23,17 @@ module tb_ch03;
     shift_b  u_b  (.clk(clk), .din(din), .q1(b1), .q2(b2), .q3(b3));
     always #5 clk = ~clk;
 
+    // Compare both shift registers with their expected values.
+    task check_shift(input integer n, input [2:0] want_nb, input [2:0] want_b);
+        begin
+            if ({a1, a2, a3} !== want_nb || {b1, b2, b3} !== want_b) begin
+                $error("shift after %0d clocks: nb=%b%b%b (want %b)  b=%b%b%b (want %b)",
+                       n, a1, a2, a3, want_nb, b1, b2, b3, want_b);
+                errors = errors + 1;
+            end
+        end
+    endtask
+
     initial begin
         errors = 0;
 
@@ -46,13 +57,18 @@ module tb_ch03;
         end
 
         // Send a single 1 into both shift registers.
+        // Expected: with <= the 1 moves one stage per clock (100, 010, 001);
+        // with = it reaches all three stages in one clock (111, 000, 000).
         @(negedge clk) din = 1'b1;
         @(negedge clk) din = 1'b0;
         $display("after 1 clock : nb=%b%b%b  b=%b%b%b", a1, a2, a3, b1, b2, b3);
+        check_shift(1, 3'b100, 3'b111);
         @(negedge clk);
         $display("after 2 clocks: nb=%b%b%b  b=%b%b%b", a1, a2, a3, b1, b2, b3);
+        check_shift(2, 3'b010, 3'b000);
         @(negedge clk);
         $display("after 3 clocks: nb=%b%b%b  b=%b%b%b", a1, a2, a3, b1, b2, b3);
+        check_shift(3, 3'b001, 3'b000);
 
         if (errors == 0) $display("PASS");
         else             $display("FAIL: %0d errors", errors);

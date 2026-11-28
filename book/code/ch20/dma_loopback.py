@@ -17,6 +17,8 @@ src = allocate(shape=(n,), dtype=np.uint32)   # physically contiguous buffers
 dst = allocate(shape=(n,), dtype=np.uint32)
 src[:] = np.arange(n) + 1000
 
+# MM2S sends the n words as one packet, with tlast on the last word;
+# axis_pedsub passes tlast through, and S2MM ends its transfer there.
 dma.recvchannel.transfer(dst)            # S2MM: PL -> DDR
 dma.sendchannel.transfer(src)            # MM2S: DDR -> PL
 dma.sendchannel.wait()

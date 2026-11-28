@@ -21,11 +21,15 @@ def confusion(t, y):
 
 
 def roc(t, score):
-    """TPR and FPR for every threshold (from high to low score)."""
-    order = np.argsort(-score)
-    ts = t[order]
-    tpr = np.r_[0.0, np.cumsum(ts == 1) / np.sum(t == 1)]
-    fpr = np.r_[0.0, np.cumsum(ts == 0) / np.sum(t == 0)]
+    """FPR and TPR for every threshold, from high to low score.
+    Events with equal scores pass together (one threshold step), so a tie
+    between a signal and a background event counts one half in the AUC."""
+    order = np.argsort(-score, kind="stable")
+    ts, ss = t[order], score[order]
+    last = np.r_[ss[1:] != ss[:-1], True]       # last event of each group of equal scores
+    tp = np.cumsum(ts == 1)[last]; fp = np.cumsum(ts == 0)[last]
+    tpr = np.r_[0.0, tp / np.sum(t == 1)]
+    fpr = np.r_[0.0, fp / np.sum(t == 0)]
     return fpr, tpr
 
 
@@ -43,8 +47,12 @@ if __name__ == "__main__":
     a = auc(fpr, tpr)
     # AUC = probability that a random signal scores above a random background
     p = np.mean(score[t == 1][:, None] > score[t == 0][None, :])
+    # ties: one signal and one background with the same score -> AUC 0.5 in either order
+    a_tie = [auc(*roc(np.array(tt), np.array([0.3, 0.3]))) for tt in ([1, 0], [0, 1])]
     (Xtr, _), (Xva, _), (Xte, _) = split(score[:, None], t)
     print(f"acc {acc:.3f} precision {prec:.3f} recall {rec:.3f} AUC {a:.4f} P(s>b) {p:.4f}")
     print(f"split sizes {len(Xtr)} {len(Xva)} {len(Xte)}")
-    ok = abs(a - p) < 1e-9 and len(Xtr) + len(Xva) + len(Xte) == len(t)
+    print(f"tie test (one signal, one background, equal scores): AUC {a_tie[0]:.2f} {a_tie[1]:.2f}")
+    ok = (abs(a - p) < 1e-9 and len(Xtr) + len(Xva) + len(Xte) == len(t)
+          and a_tie == [0.5, 0.5])
     print("PASS" if ok else "FAIL")

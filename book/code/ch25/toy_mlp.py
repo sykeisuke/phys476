@@ -26,6 +26,14 @@ def load(path, n=60000, seed=0):
     return (X[: n // 2], t[: n // 2]), (X[n // 2:], t[n // 2:])
 
 
+def load3(path, n=60000, seed=0):
+    """Same training half as load(); the other half is cut into validation
+    (used to choose a format) and test (used once, for the chosen format)."""
+    tr, (Xh, th) = load(path, n, seed)
+    m = len(th) // 2
+    return tr, (Xh[:m], th[:m]), (Xh[m:], th[m:])
+
+
 def train(X, t, H=16, eta=0.05, B=64, epochs=15, seed=1):
     """Plain mini-batch SGD (Chapter 23); X must already be scaled."""
     rng = np.random.default_rng(seed)
